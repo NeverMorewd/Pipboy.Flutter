@@ -1,0 +1,38 @@
+name: pipboy_flutter_workspace
+
+packages:
+  - packages/**
+  - apps/**
+
+command:
+  bootstrap:
+    usePubspecOverrides: true
+
+scripts:
+  analyze:
+    run: flutter analyze
+    exec:
+      concurrency: 4
+    description: Run flutter analyze in all packages
+
+  test:
+    run: flutter test
+    exec:
+      concurrency: 4
+      failFast: true
+    description: Run tests in all packages
+
+  format:
+    run: dart format --set-exit-if-changed .
+    exec:
+      concurrency: 1
+    description: Check code formatting
+
+  build:web:
+    run: flutter build web --release --base-href /Pipboy.Flutter/
+    exec:
+      concurrency: 1
+    packageFilters:
+      dirExists:
+        - web
+    description: Build web demo

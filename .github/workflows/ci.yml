@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Library: analyze + test ────────────────────────────────────────────────
+  library:
+    name: Library — Analyze & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/pipboy_flutter
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Dart format check
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Dart analyze
+        run: flutter analyze --fatal-infos
+
+      - name: Run unit tests with coverage
+        run: flutter test --coverage --reporter=github
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: packages/pipboy_flutter/coverage/lcov.info
+          flags: library
+        continue-on-error: true
+
+  # ── Demo app: analyze + build web ─────────────────────────────────────────
+  demo:
+    name: Demo — Analyze & Build Web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/pipboy_flutter_demo
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Dart analyze
+        run: flutter analyze --fatal-infos
+
+      - name: Build web (release)
+        run: flutter build web --release --base-href /Pipboy.Flutter/
+
+  # ── Demo app: build Windows ────────────────────────────────────────────────
+  demo-windows:
+    name: Demo — Build Windows
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: apps/pipboy_flutter_demo
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release

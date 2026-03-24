@@ -1,0 +1,71 @@
+name: Publish to pub.dev
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'   # e.g. v0.1.0, v1.0.0-beta.1
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no actual publish)'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  publish:
+    name: Publish pipboy_flutter
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for pub.dev OIDC authentication
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        working-directory: packages/pipboy_flutter
+        run: flutter pub get
+
+      - name: Dart analyze
+        working-directory: packages/pipboy_flutter
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests
+        working-directory: packages/pipboy_flutter
+        run: flutter test
+
+      - name: Verify package score (pana)
+        working-directory: packages/pipboy_flutter
+        run: |
+          dart pub global activate pana
+          dart pub global run pana --no-warning . || true
+
+      - name: Publish (dry run)
+        if: ${{ github.event.inputs.dry_run == 'true' || github.event_name == 'workflow_dispatch' }}
+        working-directory: packages/pipboy_flutter
+        run: flutter pub publish --dry-run
+
+      - name: Publish to pub.dev
+        if: ${{ startsWith(github.ref, 'refs/tags/v') && github.event.inputs.dry_run != 'true' }}
+        working-directory: packages/pipboy_flutter
+        run: flutter pub publish --force
+
+      - name: Create GitHub Release
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          body: |
+            ## pipboy_flutter ${{ github.ref_name }}
+
+            Install via:
+            ```yaml
+            dependencies:
+              pipboy_flutter: ${{ github.ref_name }}
+            ```

@@ -1,0 +1,68 @@
+name: Deploy Web Demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build WASM / Web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/pipboy_flutter_demo
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build web (WASM / CanvasKit)
+        run: |
+          flutter build web \
+            --release \
+            --base-href /Pipboy.Flutter/ \
+            --web-renderer canvaskit
+
+      - name: Disable Jekyll (prevent _framework mangling)
+        run: touch build/web/.nojekyll
+
+      - name: Copy index.html → 404.html (SPA routing fallback)
+        run: cp build/web/index.html build/web/404.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/pipboy_flutter_demo/build/web
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

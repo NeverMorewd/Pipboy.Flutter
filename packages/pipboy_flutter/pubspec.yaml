@@ -1,0 +1,22 @@
+name: pipboy_flutter
+description: >-
+  A professional Flutter theme library inspired by the Pip-Boy UI from the Fallout series.
+  Provides a complete Material-3 based theme with monochromatic HSL palette, CRT effects,
+  and custom widgets for desktop, mobile, and web platforms.
+version: 0.1.0
+homepage: https://github.com/NevermoreWD/Pipboy.Flutter
+
+environment:
+  sdk: ^3.11.3
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
