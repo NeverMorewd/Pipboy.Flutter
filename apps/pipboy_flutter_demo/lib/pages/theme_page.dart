@@ -31,11 +31,11 @@ class ThemePage extends StatelessWidget {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
-                        color: isActive
-                            ? palette.selection
-                            : palette.surface,
+                        color: isActive ? palette.selection : palette.surface,
                         border: Border.all(
                           color: isActive ? entry.value : palette.border,
                           width: isActive ? 1.5 : 1,

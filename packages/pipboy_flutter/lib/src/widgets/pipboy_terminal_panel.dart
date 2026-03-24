@@ -62,8 +62,10 @@ class _PipboyTerminalPanelState extends State<PipboyTerminalPanel> {
     if (oldWidget.lines != widget.lines) {
       _fullText = widget.lines.join('\n');
       _visibleChars = 0;
-      if (widget.typewriter) _startTypewriter();
-      else setState(() => _visibleChars = _fullText.length);
+      if (widget.typewriter)
+        _startTypewriter();
+      else
+        setState(() => _visibleChars = _fullText.length);
     }
   }
 

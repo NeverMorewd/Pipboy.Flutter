@@ -75,27 +75,29 @@ class _PipboyCrtDisplayState extends State<PipboyCrtDisplay>
       duration: widget.scanBeamDuration,
     )..repeat();
 
-    _beamPosition = Tween<double>(begin: -0.1, end: 1.1).animate(
-      CurvedAnimation(parent: _beamController, curve: Curves.linear),
-    );
+    _beamPosition = Tween<double>(
+      begin: -0.1,
+      end: 1.1,
+    ).animate(CurvedAnimation(parent: _beamController, curve: Curves.linear));
 
-    _flickerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 80),
-    )..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _flickerValue = 1.0 -
-              (_random.nextDouble() * widget.flickerIntensity);
-          if (widget.flicker) {
-            Future.delayed(
-              Duration(milliseconds: 200 + _random.nextInt(800)),
-              () {
-                if (mounted) _flickerController.forward(from: 0);
-              },
-            );
+    _flickerController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 80),
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.completed) {
+            _flickerValue =
+                1.0 - (_random.nextDouble() * widget.flickerIntensity);
+            if (widget.flicker) {
+              Future.delayed(
+                Duration(milliseconds: 200 + _random.nextInt(800)),
+                () {
+                  if (mounted) _flickerController.forward(from: 0);
+                },
+              );
+            }
           }
-        }
-      });
+        });
 
     if (widget.flicker) {
       Future.delayed(const Duration(milliseconds: 500), () {
@@ -160,10 +162,8 @@ class _PipboyCrtDisplayState extends State<PipboyCrtDisplay>
     if (widget.flicker) {
       content = AnimatedBuilder(
         animation: _flickerController,
-        builder: (context, child) => Opacity(
-          opacity: _flickerValue,
-          child: child,
-        ),
+        builder: (context, child) =>
+            Opacity(opacity: _flickerValue, child: child),
         child: content,
       );
     }

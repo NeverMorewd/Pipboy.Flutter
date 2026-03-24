@@ -76,8 +76,9 @@ class _ListsPageState extends State<ListsPage> {
                       onTap: () => setState(() => _selectedItem = i),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 120),
-                        color:
-                            selected ? palette.selection : Colors.transparent,
+                        color: selected
+                            ? palette.selection
+                            : Colors.transparent,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 8,

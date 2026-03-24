@@ -110,8 +110,7 @@ class PipboyTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: p.surface,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         hintStyle: TextStyle(
           color: p.textDim,
           fontFamily: fontFamily,
@@ -226,8 +225,10 @@ class PipboyTheme {
         disabledInactiveTrackColor: p.disabled.withValues(alpha: 0.3),
         disabledThumbColor: p.disabled,
         valueIndicatorColor: p.surfaceHigh,
-        valueIndicatorTextStyle:
-            TextStyle(color: p.primary, fontFamily: fontFamily),
+        valueIndicatorTextStyle: TextStyle(
+          color: p.primary,
+          fontFamily: fontFamily,
+        ),
         trackShape: const RectangularSliderTrackShape(),
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
         overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
@@ -254,11 +255,7 @@ class PipboyTheme {
       ),
 
       // ── Divider ────────────────────────────────────────────────────────────
-      dividerTheme: DividerThemeData(
-        color: p.border,
-        thickness: 1,
-        space: 8,
-      ),
+      dividerTheme: DividerThemeData(color: p.border, thickness: 1, space: 8),
 
       // ── TabBar ─────────────────────────────────────────────────────────────
       tabBarTheme: TabBarThemeData(
@@ -359,15 +356,12 @@ class PipboyTheme {
             fontFamily: fontFamily,
             fontSize: PipboyColorPalette.fontSizeSmall,
             color: selected ? p.primary : p.textDim,
-            fontWeight:
-                selected ? FontWeight.bold : FontWeight.normal,
+            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
-          return IconThemeData(
-            color: selected ? p.primary : p.textDim,
-          );
+          return IconThemeData(color: selected ? p.primary : p.textDim);
         }),
       ),
 
@@ -443,11 +437,13 @@ class PipboyTheme {
           fontSize: PipboyColorPalette.fontSize,
           color: p.text,
         ),
-        labelTextStyle: WidgetStatePropertyAll(TextStyle(
-          fontFamily: fontFamily,
-          fontSize: PipboyColorPalette.fontSize,
-          color: p.text,
-        )),
+        labelTextStyle: WidgetStatePropertyAll(
+          TextStyle(
+            fontFamily: fontFamily,
+            fontSize: PipboyColorPalette.fontSize,
+            color: p.text,
+          ),
+        ),
       ),
 
       // ── BottomSheet ────────────────────────────────────────────────────────
@@ -573,16 +569,20 @@ class PipboyTheme {
         }),
         side: WidgetStatePropertyAll(BorderSide(color: p.border)),
         shape: const WidgetStatePropertyAll(shape),
-        textStyle: WidgetStatePropertyAll(TextStyle(
-          fontFamily: fontFamily,
-          fontSize: PipboyColorPalette.fontSize,
-          color: p.text,
-        )),
-        hintStyle: WidgetStatePropertyAll(TextStyle(
-          fontFamily: fontFamily,
-          fontSize: PipboyColorPalette.fontSize,
-          color: p.textDim,
-        )),
+        textStyle: WidgetStatePropertyAll(
+          TextStyle(
+            fontFamily: fontFamily,
+            fontSize: PipboyColorPalette.fontSize,
+            color: p.text,
+          ),
+        ),
+        hintStyle: WidgetStatePropertyAll(
+          TextStyle(
+            fontFamily: fontFamily,
+            fontSize: PipboyColorPalette.fontSize,
+            color: p.textDim,
+          ),
+        ),
       ),
     );
   }

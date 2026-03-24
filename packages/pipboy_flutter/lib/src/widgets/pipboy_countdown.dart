@@ -127,7 +127,8 @@ class PipboyCountdownState extends State<PipboyCountdown> {
   @override
   Widget build(BuildContext context) {
     final palette = PipboyThemeData.paletteOf(context);
-    final textColor = widget.color ??
+    final textColor =
+        widget.color ??
         (_remaining == Duration.zero ? palette.error : palette.primary);
     final fontSize = widget.fontSize ?? PipboyColorPalette.fontSizeH1;
 

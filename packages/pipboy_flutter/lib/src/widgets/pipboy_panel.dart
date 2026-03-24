@@ -86,7 +86,10 @@ class PipboyPanel extends StatelessWidget {
             if (footer != null) ...[
               Divider(height: 1, color: borderColor),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
                 child: footer,
               ),
             ],
@@ -183,17 +186,9 @@ class _CornerDecorated extends StatelessWidget {
       children: [
         Padding(padding: padding, child: child),
         // Top-left corner square
-        Positioned(
-          top: 3,
-          left: 3,
-          child: _CornerSquare(color: borderColor),
-        ),
+        Positioned(top: 3, left: 3, child: _CornerSquare(color: borderColor)),
         // Top-right corner square
-        Positioned(
-          top: 3,
-          right: 3,
-          child: _CornerSquare(color: borderColor),
-        ),
+        Positioned(top: 3, right: 3, child: _CornerSquare(color: borderColor)),
         // Bottom-left corner square
         Positioned(
           bottom: 3,
@@ -221,9 +216,7 @@ class _CornerSquare extends StatelessWidget {
       width: 5,
       height: 5,
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border.all(color: color, width: 1),
-        ),
+        decoration: BoxDecoration(border: Border.all(color: color, width: 1)),
       ),
     );
   }

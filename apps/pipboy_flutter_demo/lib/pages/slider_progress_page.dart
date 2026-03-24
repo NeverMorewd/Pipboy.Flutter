@@ -98,10 +98,7 @@ class _SliderProgressPageState extends State<SliderProgressPage> {
             ),
             DemoSection(
               title: 'Disabled Slider',
-              child: Slider(
-                value: 0.4,
-                onChanged: null,
-              ),
+              child: Slider(value: 0.4, onChanged: null),
             ),
             DemoSection(
               title: 'LinearProgressIndicator',
@@ -142,16 +139,12 @@ class _SliderProgressPageState extends State<SliderProgressPage> {
                       Expanded(
                         child: _loading
                             ? const LinearProgressIndicator()
-                            : Container(
-                                height: 6,
-                                color: palette.border,
-                              ),
+                            : Container(height: 6, color: palette.border),
                       ),
                       const SizedBox(width: 12),
                       PipboyButton(
                         variant: PipboyButtonVariant.ghost,
-                        onPressed: () =>
-                            setState(() => _loading = !_loading),
+                        onPressed: () => setState(() => _loading = !_loading),
                         child: Text(_loading ? 'CANCEL' : 'LOAD'),
                       ),
                     ],

@@ -128,12 +128,7 @@ class _TogglesPageState extends State<TogglesPage> {
                 underline: Container(height: 1, color: palette.border),
                 icon: Icon(Icons.arrow_drop_down, color: palette.primary),
                 items: _dropdownItems
-                    .map(
-                      (v) => DropdownMenuItem(
-                        value: v,
-                        child: Text(v),
-                      ),
-                    )
+                    .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                     .toList(),
                 onChanged: (v) => setState(() => _dropdown = v),
               ),
@@ -145,9 +140,7 @@ class _TogglesPageState extends State<TogglesPage> {
                 label: const Text('SELECT VAULT'),
                 expandedInsets: EdgeInsets.zero,
                 dropdownMenuEntries: _dropdownItems
-                    .map(
-                      (v) => DropdownMenuEntry(value: v, label: v),
-                    )
+                    .map((v) => DropdownMenuEntry(value: v, label: v))
                     .toList(),
                 onSelected: (v) => setState(() => _dropdown = v),
               ),
@@ -157,27 +150,22 @@ class _TogglesPageState extends State<TogglesPage> {
               child: Wrap(
                 spacing: 8,
                 runSpacing: 4,
-                children: [
-                  'WEAPONS',
-                  'ARMOR',
-                  'AID',
-                  'MISC',
-                  'AMMO',
-                  'JUNK',
-                ].map((label) {
-                  final selected = _selected.contains(label);
-                  return FilterChip(
-                    label: Text(label),
-                    selected: selected,
-                    onSelected: (v) => setState(() {
-                      if (v) {
-                        _selected.add(label);
-                      } else {
-                        _selected.remove(label);
-                      }
-                    }),
-                  );
-                }).toList(),
+                children: ['WEAPONS', 'ARMOR', 'AID', 'MISC', 'AMMO', 'JUNK']
+                    .map((label) {
+                      final selected = _selected.contains(label);
+                      return FilterChip(
+                        label: Text(label),
+                        selected: selected,
+                        onSelected: (v) => setState(() {
+                          if (v) {
+                            _selected.add(label);
+                          } else {
+                            _selected.remove(label);
+                          }
+                        }),
+                      );
+                    })
+                    .toList(),
               ),
             ),
           ],

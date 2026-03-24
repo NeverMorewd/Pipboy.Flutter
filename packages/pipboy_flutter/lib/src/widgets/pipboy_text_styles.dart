@@ -77,8 +77,13 @@ class PipboyDimText extends StatelessWidget {
 
 /// Accent text — primary color.
 class PipboyAccentText extends StatelessWidget {
-  const PipboyAccentText(this.text,
-      {super.key, this.textAlign, this.fontSize, this.bold = false});
+  const PipboyAccentText(
+    this.text, {
+    super.key,
+    this.textAlign,
+    this.fontSize,
+    this.bold = false,
+  });
   final String text;
   final TextAlign? textAlign;
   final double? fontSize;
@@ -176,9 +181,7 @@ class PipboyCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: elevated ? p.surfaceHigh : p.surface,
-        border: Border.all(
-          color: elevated ? p.primaryDark : p.border,
-        ),
+        border: Border.all(color: elevated ? p.primaryDark : p.border),
       ),
       child: child,
     );

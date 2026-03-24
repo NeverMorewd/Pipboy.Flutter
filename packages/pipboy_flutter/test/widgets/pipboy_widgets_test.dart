@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pipboy_flutter/pipboy_flutter.dart';
 
 Widget _wrap(Widget child) => MaterialApp(
-      theme: PipboyTheme.buildTheme(),
-      home: Scaffold(body: SingleChildScrollView(child: child)),
-    );
+  theme: PipboyTheme.buildTheme(),
+  home: Scaffold(body: SingleChildScrollView(child: child)),
+);
 
 void main() {
   // ── PipboySegmentedBar ────────────────────────────────────────────────────
@@ -13,29 +13,30 @@ void main() {
   group('PipboySegmentedBar', () {
     testWidgets('renders at value=0 without error', (tester) async {
       await tester.pumpWidget(
-          _wrap(const PipboySegmentedBar(value: 0.0, label: 'HP')));
+        _wrap(const PipboySegmentedBar(value: 0.0, label: 'HP')),
+      );
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('renders at value=1 without error', (tester) async {
       await tester.pumpWidget(
-          _wrap(const PipboySegmentedBar(value: 1.0, label: 'HP')));
+        _wrap(const PipboySegmentedBar(value: 1.0, label: 'HP')),
+      );
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('label is rendered when showLabel=true', (tester) async {
       await tester.pumpWidget(
-          _wrap(const PipboySegmentedBar(value: 0.5, label: 'AP')));
+        _wrap(const PipboySegmentedBar(value: 0.5, label: 'AP')),
+      );
       expect(find.text('AP'), findsOneWidget);
     });
 
     testWidgets('label is hidden when showLabel=false', (tester) async {
       await tester.pumpWidget(
-        _wrap(const PipboySegmentedBar(
-          value: 0.5,
-          label: 'AP',
-          showLabel: false,
-        )),
+        _wrap(
+          const PipboySegmentedBar(value: 0.5, label: 'AP', showLabel: false),
+        ),
       );
       expect(find.text('AP'), findsNothing);
     });
@@ -46,20 +47,23 @@ void main() {
   group('PipboyRatedAttribute', () {
     testWidgets('renders label and value', (tester) async {
       await tester.pumpWidget(
-          _wrap(const PipboyRatedAttribute(label: 'STR', value: 7)));
+        _wrap(const PipboyRatedAttribute(label: 'STR', value: 7)),
+      );
       expect(find.text('STR'), findsOneWidget);
       expect(find.text('7'), findsOneWidget);
     });
 
     testWidgets('value=0 renders without error', (tester) async {
       await tester.pumpWidget(
-          _wrap(const PipboyRatedAttribute(label: 'LCK', value: 0)));
+        _wrap(const PipboyRatedAttribute(label: 'LCK', value: 0)),
+      );
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('value=maxValue renders without error', (tester) async {
       await tester.pumpWidget(
-          _wrap(const PipboyRatedAttribute(label: 'INT', value: 10)));
+        _wrap(const PipboyRatedAttribute(label: 'INT', value: 10)),
+      );
       expect(tester.takeException(), isNull);
     });
   });
@@ -74,7 +78,8 @@ void main() {
 
     testWidgets('disabled blinking still renders text', (tester) async {
       await tester.pumpWidget(
-          _wrap(const PipboyBlinkText('STATIC', enabled: false)));
+        _wrap(const PipboyBlinkText('STATIC', enabled: false)),
+      );
       expect(find.text('STATIC'), findsOneWidget);
     });
 
@@ -91,10 +96,7 @@ void main() {
     testWidgets('shows brackets when selected=true', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          const PipboyBracketHighlight(
-            selected: true,
-            child: Text('ITEM'),
-          ),
+          const PipboyBracketHighlight(selected: true, child: Text('ITEM')),
         ),
       );
       expect(find.text('>'), findsOneWidget);
@@ -104,10 +106,7 @@ void main() {
     testWidgets('brackets have zero width when selected=false', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          const PipboyBracketHighlight(
-            selected: false,
-            child: Text('ITEM'),
-          ),
+          const PipboyBracketHighlight(selected: false, child: Text('ITEM')),
         ),
       );
       // Brackets exist but are clipped to zero width.
@@ -117,10 +116,7 @@ void main() {
     testWidgets('child is always rendered', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          const PipboyBracketHighlight(
-            selected: false,
-            child: Text('VISIBLE'),
-          ),
+          const PipboyBracketHighlight(selected: false, child: Text('VISIBLE')),
         ),
       );
       expect(find.text('VISIBLE'), findsOneWidget);
@@ -132,10 +128,7 @@ void main() {
   group('PipboyButton', () {
     testWidgets('standard variant renders child', (tester) async {
       await tester.pumpWidget(
-        _wrap(PipboyButton(
-          onPressed: () {},
-          child: const Text('CLICK'),
-        )),
+        _wrap(PipboyButton(onPressed: () {}, child: const Text('CLICK'))),
       );
       expect(find.text('CLICK'), findsOneWidget);
     });
@@ -143,10 +136,12 @@ void main() {
     testWidgets('onPressed fires on tap', (tester) async {
       var pressed = false;
       await tester.pumpWidget(
-        _wrap(PipboyButton(
-          onPressed: () => pressed = true,
-          child: const Text('TAP'),
-        )),
+        _wrap(
+          PipboyButton(
+            onPressed: () => pressed = true,
+            child: const Text('TAP'),
+          ),
+        ),
       );
       await tester.tap(find.text('TAP'));
       await tester.pump();
@@ -155,10 +150,7 @@ void main() {
 
     testWidgets('disabled when onPressed=null', (tester) async {
       await tester.pumpWidget(
-        _wrap(const PipboyButton(
-          onPressed: null,
-          child: Text('DISABLED'),
-        )),
+        _wrap(const PipboyButton(onPressed: null, child: Text('DISABLED'))),
       );
       expect(tester.takeException(), isNull);
     });
@@ -166,11 +158,13 @@ void main() {
     for (final variant in PipboyButtonVariant.values) {
       testWidgets('$variant renders without error', (tester) async {
         await tester.pumpWidget(
-          _wrap(PipboyButton(
-            onPressed: () {},
-            variant: variant,
-            child: Text(variant.name.toUpperCase()),
-          )),
+          _wrap(
+            PipboyButton(
+              onPressed: () {},
+              variant: variant,
+              child: Text(variant.name.toUpperCase()),
+            ),
+          ),
         );
         expect(tester.takeException(), isNull);
       });
@@ -290,11 +284,7 @@ void main() {
   group('PipboyCrtDisplay', () {
     testWidgets('renders child content', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          const PipboyCrtDisplay(
-            child: Text('TERMINAL'),
-          ),
-        ),
+        _wrap(const PipboyCrtDisplay(child: Text('TERMINAL'))),
       );
       expect(find.text('TERMINAL'), findsOneWidget);
     });

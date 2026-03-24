@@ -8,10 +8,10 @@ class PipboyHslColor {
     required this.saturation,
     required this.lightness,
     this.alpha = 1.0,
-  })  : assert(hue >= 0.0 && hue <= 360.0),
-        assert(saturation >= 0.0 && saturation <= 1.0),
-        assert(lightness >= 0.0 && lightness <= 1.0),
-        assert(alpha >= 0.0 && alpha <= 1.0);
+  }) : assert(hue >= 0.0 && hue <= 360.0),
+       assert(saturation >= 0.0 && saturation <= 1.0),
+       assert(lightness >= 0.0 && lightness <= 1.0),
+       assert(alpha >= 0.0 && alpha <= 1.0);
 
   final double hue;
   final double saturation;
@@ -119,15 +119,17 @@ class PipboyColorPalette {
       primary: derived(lightness: hsl.lightness),
       primaryLight: derived(lightness: math.min(hsl.lightness + 0.25, 1.0)),
       primaryDark: derived(lightness: math.max(hsl.lightness - 0.25, 0.0)),
-      background:
-          derived(saturation: 0.30 * ss * hsl.saturation, lightness: 0.05),
-      surface:
-          derived(saturation: 0.28 * ss * hsl.saturation, lightness: 0.09),
-      surfaceHigh:
-          derived(saturation: 0.25 * ss * hsl.saturation, lightness: 0.14),
+      background: derived(
+        saturation: 0.30 * ss * hsl.saturation,
+        lightness: 0.05,
+      ),
+      surface: derived(saturation: 0.28 * ss * hsl.saturation, lightness: 0.09),
+      surfaceHigh: derived(
+        saturation: 0.25 * ss * hsl.saturation,
+        lightness: 0.14,
+      ),
       text: derived(saturation: 0.70 * ss * hsl.saturation, lightness: 0.85),
-      textDim:
-          derived(saturation: 0.45 * ss * hsl.saturation, lightness: 0.58),
+      textDim: derived(saturation: 0.45 * ss * hsl.saturation, lightness: 0.58),
       hover: derived(
         saturation: math.min(hsl.saturation * 0.60, 0.55),
         lightness: 0.20,
@@ -136,8 +138,10 @@ class PipboyColorPalette {
         saturation: math.min(hsl.saturation * 0.50, 0.45),
         lightness: 0.13,
       ),
-      disabled:
-          derived(saturation: 0.15 * ss * hsl.saturation, lightness: 0.35),
+      disabled: derived(
+        saturation: 0.15 * ss * hsl.saturation,
+        lightness: 0.35,
+      ),
       focus: derived(lightness: math.min(hsl.lightness + 0.30, 0.95)),
       selection: derived(lightness: math.min(hsl.lightness * 0.45, 0.30)),
       border: derived(lightness: math.max(hsl.lightness - 0.10, 0.0)),

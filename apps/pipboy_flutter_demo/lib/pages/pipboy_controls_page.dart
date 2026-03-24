@@ -35,9 +35,7 @@ class _PipboyControlsPageState extends State<PipboyControlsPage> {
                       title: 'VAULT STATUS',
                       onClose: () => setState(() => _panelClosed = true),
                       footer: Row(
-                        children: [
-                          PipboyDimText('Last updated: 2077-10-23'),
-                        ],
+                        children: [PipboyDimText('Last updated: 2077-10-23')],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,14 +59,14 @@ class _PipboyControlsPageState extends State<PipboyControlsPage> {
                     title: 'ALERT',
                     variant: PipboyPanelVariant.warning,
                     child: PipboyWarningText(
-                        'RADIATION LEVELS EXCEEDING SAFE THRESHOLD'),
+                      'RADIATION LEVELS EXCEEDING SAFE THRESHOLD',
+                    ),
                   ),
                   const SizedBox(height: 12),
                   PipboyPanel(
                     title: 'MISSION COMPLETE',
                     variant: PipboyPanelVariant.accent,
-                    child:
-                        PipboySuccessText('Vault 111 security disabled.'),
+                    child: PipboySuccessText('Vault 111 security disabled.'),
                   ),
                 ],
               ),
@@ -86,9 +84,7 @@ class _PipboyControlsPageState extends State<PipboyControlsPage> {
                     height: 60,
                     color: palette.surface.withAlpha(128),
                     alignment: Alignment.center,
-                    child: PipboyAccentText(
-                      'Tab ${_tabIndex + 1} selected',
-                    ),
+                    child: PipboyAccentText('Tab ${_tabIndex + 1} selected'),
                   ),
                 ],
               ),
@@ -133,9 +129,17 @@ class _PipboyControlsPageState extends State<PipboyControlsPage> {
               title: 'PipboySegmentedBar',
               child: Column(
                 children: [
-                  PipboySegmentedBar(value: 0.85, label: 'HP', segmentCount: 20),
+                  PipboySegmentedBar(
+                    value: 0.85,
+                    label: 'HP',
+                    segmentCount: 20,
+                  ),
                   const SizedBox(height: 8),
-                  PipboySegmentedBar(value: 0.55, label: 'AP', segmentCount: 20),
+                  PipboySegmentedBar(
+                    value: 0.55,
+                    label: 'AP',
+                    segmentCount: 20,
+                  ),
                   const SizedBox(height: 8),
                   PipboySegmentedBar(
                     value: 0.2,
@@ -227,9 +231,7 @@ class _PipboyControlsPageState extends State<PipboyControlsPage> {
                       ],
                     ),
                   ),
-                  const PipboyHud(
-                    child: Text('HUD READOUT: OK'),
-                  ),
+                  const PipboyHud(child: Text('HUD READOUT: OK')),
                 ],
               ),
             ),

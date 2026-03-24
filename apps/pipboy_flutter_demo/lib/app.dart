@@ -211,8 +211,7 @@ class _SideNav extends StatelessWidget {
                           Icon(
                             item.icon,
                             size: 16,
-                            color:
-                                selected ? palette.primary : palette.textDim,
+                            color: selected ? palette.primary : palette.textDim,
                           ),
                           const SizedBox(width: 10),
                           Text(

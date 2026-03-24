@@ -3,44 +3,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pipboy_flutter/pipboy_flutter.dart';
 
 Widget _wrap(Widget child) => MaterialApp(
-      theme: PipboyTheme.buildTheme(),
-      home: Scaffold(body: child),
-    );
+  theme: PipboyTheme.buildTheme(),
+  home: Scaffold(body: child),
+);
 
 void main() {
   group('PipboyPanel', () {
     testWidgets('renders title text', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          const PipboyPanel(
-            title: 'TEST PANEL',
-            child: Text('content'),
-          ),
-        ),
+        _wrap(const PipboyPanel(title: 'TEST PANEL', child: Text('content'))),
       );
       expect(find.text('TEST PANEL'), findsOneWidget);
     });
 
     testWidgets('renders child content', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          const PipboyPanel(
-            title: 'T',
-            child: Text('hello world'),
-          ),
-        ),
+        _wrap(const PipboyPanel(title: 'T', child: Text('hello world'))),
       );
       expect(find.text('hello world'), findsOneWidget);
     });
 
     testWidgets('close button is absent when onClose is null', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          const PipboyPanel(
-            title: 'T',
-            child: SizedBox(),
-          ),
-        ),
+        _wrap(const PipboyPanel(title: 'T', child: SizedBox())),
       );
       expect(find.text('[X]'), findsNothing);
     });

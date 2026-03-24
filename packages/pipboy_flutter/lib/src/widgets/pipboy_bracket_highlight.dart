@@ -28,8 +28,7 @@ class PipboyBracketHighlight extends StatefulWidget {
   final TextStyle? bracketStyle;
 
   @override
-  State<PipboyBracketHighlight> createState() =>
-      _PipboyBracketHighlightState();
+  State<PipboyBracketHighlight> createState() => _PipboyBracketHighlightState();
 }
 
 class _PipboyBracketHighlightState extends State<PipboyBracketHighlight>
@@ -45,12 +44,14 @@ class _PipboyBracketHighlightState extends State<PipboyBracketHighlight>
       vsync: this,
       duration: widget.animationDuration,
     );
-    _slide = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
-    _fade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
+    _slide = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _fade = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
     if (widget.selected) _controller.value = 1.0;
   }
@@ -76,7 +77,8 @@ class _PipboyBracketHighlightState extends State<PipboyBracketHighlight>
   @override
   Widget build(BuildContext context) {
     final palette = PipboyThemeData.paletteOf(context);
-    final bracketStyle = widget.bracketStyle ??
+    final bracketStyle =
+        widget.bracketStyle ??
         TextStyle(
           fontFamily: 'Courier New',
           fontSize: PipboyColorPalette.fontSize,
@@ -105,8 +107,7 @@ class _PipboyBracketHighlightState extends State<PipboyBracketHighlight>
             ),
             DefaultTextStyle.merge(
               style: TextStyle(
-                color:
-                    widget.selected ? palette.primary : palette.text,
+                color: widget.selected ? palette.primary : palette.text,
               ),
               child: widget.child,
             ),

@@ -53,10 +53,7 @@ class DialogsPage extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('QUEST COMPLETED: THE FIRST STEP'),
-        action: SnackBarAction(
-          label: 'VIEW',
-          onPressed: () {},
-        ),
+        action: SnackBarAction(label: 'VIEW', onPressed: () {}),
       ),
     );
   }
@@ -75,24 +72,32 @@ class DialogsPage extends StatelessWidget {
               PipboyH2('ITEM OPTIONS'),
               const SizedBox(height: 16),
               ListTile(
-                leading:
-                    Icon(Icons.info_outline, color: palette.primary, size: 18),
+                leading: Icon(
+                  Icons.info_outline,
+                  color: palette.primary,
+                  size: 18,
+                ),
                 title: const Text('EXAMINE'),
                 contentPadding: EdgeInsets.zero,
                 onTap: () => Navigator.pop(context),
               ),
               ListTile(
-                leading: Icon(Icons.back_hand_outlined,
-                    color: palette.primary, size: 18),
+                leading: Icon(
+                  Icons.back_hand_outlined,
+                  color: palette.primary,
+                  size: 18,
+                ),
                 title: const Text('EQUIP'),
                 contentPadding: EdgeInsets.zero,
                 onTap: () => Navigator.pop(context),
               ),
               ListTile(
-                leading:
-                    Icon(Icons.delete_outline, color: palette.error, size: 18),
-                title:
-                    Text('DROP', style: TextStyle(color: palette.error)),
+                leading: Icon(
+                  Icons.delete_outline,
+                  color: palette.error,
+                  size: 18,
+                ),
+                title: Text('DROP', style: TextStyle(color: palette.error)),
                 contentPadding: EdgeInsets.zero,
                 onTap: () => Navigator.pop(context),
               ),
@@ -208,15 +213,10 @@ class DialogsPage extends StatelessWidget {
                 children: [
                   Badge(
                     label: const Text('3'),
-                    child: Icon(
-                      Icons.notifications_outlined,
-                      size: 28,
-                    ),
+                    child: Icon(Icons.notifications_outlined, size: 28),
                   ),
                   const SizedBox(width: 24),
-                  Badge(
-                    child: Icon(Icons.mail_outline, size: 28),
-                  ),
+                  Badge(child: Icon(Icons.mail_outline, size: 28)),
                 ],
               ),
             ),

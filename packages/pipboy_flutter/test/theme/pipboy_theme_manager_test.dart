@@ -18,8 +18,7 @@ void main() {
         ),
       );
 
-      expect(manager.primaryColor,
-          equals(PipboyColorPalette.defaultPrimary));
+      expect(manager.primaryColor, equals(PipboyColorPalette.defaultPrimary));
     });
 
     testWidgets('initializes with custom color', (tester) async {

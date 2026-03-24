@@ -62,8 +62,11 @@ void main() {
         greenPalette.success,
       ];
       for (final color in colors) {
-        expect(color.alpha, greaterThan(0),
-            reason: 'Color $color must not be transparent');
+        expect(
+          color.alpha,
+          greaterThan(0),
+          reason: 'Color $color must not be transparent',
+        );
       }
     });
 
@@ -81,15 +84,13 @@ void main() {
 
     test('primaryLight is lighter than primary', () {
       final pL = PipboyHslColor.fromColor(greenPalette.primary).lightness;
-      final plL =
-          PipboyHslColor.fromColor(greenPalette.primaryLight).lightness;
+      final plL = PipboyHslColor.fromColor(greenPalette.primaryLight).lightness;
       expect(plL, greaterThan(pL));
     });
 
     test('primaryDark is darker than primary', () {
       final pL = PipboyHslColor.fromColor(greenPalette.primary).lightness;
-      final pdL =
-          PipboyHslColor.fromColor(greenPalette.primaryDark).lightness;
+      final pdL = PipboyHslColor.fromColor(greenPalette.primaryDark).lightness;
       expect(pdL, lessThan(pL));
     });
 
@@ -119,8 +120,11 @@ void main() {
         final hue = PipboyHslColor.fromColor(color).hue;
         // Allow small floating-point deviation.
         // Allow up to 5° deviation from floating-point HSL roundtrip.
-        expect((hue - primaryHue).abs(), lessThanOrEqualTo(5.0),
-            reason: 'Expected $color to share hue ~$primaryHue, got $hue');
+        expect(
+          (hue - primaryHue).abs(),
+          lessThanOrEqualTo(5.0),
+          reason: 'Expected $color to share hue ~$primaryHue, got $hue',
+        );
       }
     });
 
@@ -132,12 +136,18 @@ void main() {
 
     test('font size constants are positive and correctly ordered', () {
       expect(PipboyColorPalette.fontSizeXSmall, greaterThan(0));
-      expect(PipboyColorPalette.fontSizeSmall,
-          greaterThan(PipboyColorPalette.fontSizeXSmall));
-      expect(PipboyColorPalette.fontSize,
-          greaterThan(PipboyColorPalette.fontSizeSmall));
-      expect(PipboyColorPalette.fontSizeLarge,
-          greaterThan(PipboyColorPalette.fontSize));
+      expect(
+        PipboyColorPalette.fontSizeSmall,
+        greaterThan(PipboyColorPalette.fontSizeXSmall),
+      );
+      expect(
+        PipboyColorPalette.fontSize,
+        greaterThan(PipboyColorPalette.fontSizeSmall),
+      );
+      expect(
+        PipboyColorPalette.fontSizeLarge,
+        greaterThan(PipboyColorPalette.fontSize),
+      );
     });
   });
 }

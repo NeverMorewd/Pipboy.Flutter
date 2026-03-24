@@ -113,9 +113,7 @@ class PipboyVignetteOverlay extends StatelessWidget {
         child,
         Positioned.fill(
           child: IgnorePointer(
-            child: CustomPaint(
-              painter: _VignettePainter(intensity: intensity),
-            ),
+            child: CustomPaint(painter: _VignettePainter(intensity: intensity)),
           ),
         ),
       ],

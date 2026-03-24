@@ -76,7 +76,8 @@ class _PipboyBlinkTextState extends State<PipboyBlinkText>
   @override
   Widget build(BuildContext context) {
     final palette = PipboyThemeData.paletteOf(context);
-    final style = widget.style ??
+    final style =
+        widget.style ??
         TextStyle(
           fontFamily: 'Courier New',
           fontSize: PipboyColorPalette.fontSize,

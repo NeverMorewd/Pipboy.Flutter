@@ -29,8 +29,7 @@ class PipboyThemeManager extends StatefulWidget {
 
   /// Retrieves the nearest [PipboyThemeManagerState] from the widget tree.
   static PipboyThemeManagerState of(BuildContext context) {
-    final state =
-        context.findAncestorStateOfType<PipboyThemeManagerState>();
+    final state = context.findAncestorStateOfType<PipboyThemeManagerState>();
     assert(
       state != null,
       'PipboyThemeManager not found in widget tree. '

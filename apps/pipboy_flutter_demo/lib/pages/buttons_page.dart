@@ -20,10 +20,7 @@ class ButtonsPage extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  PipboyButton(
-                    onPressed: () {},
-                    child: const Text('STANDARD'),
-                  ),
+                  PipboyButton(onPressed: () {}, child: const Text('STANDARD')),
                   PipboyButton(
                     variant: PipboyButtonVariant.accent,
                     onPressed: () {},
@@ -48,10 +45,7 @@ class ButtonsPage extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  PipboyButton(
-                    onPressed: null,
-                    child: const Text('STANDARD'),
-                  ),
+                  PipboyButton(onPressed: null, child: const Text('STANDARD')),
                   PipboyButton(
                     variant: PipboyButtonVariant.accent,
                     onPressed: null,
@@ -88,14 +82,8 @@ class ButtonsPage extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  FilledButton(
-                    onPressed: () {},
-                    child: const Text('FILLED'),
-                  ),
-                  FilledButton(
-                    onPressed: null,
-                    child: const Text('DISABLED'),
-                  ),
+                  FilledButton(onPressed: () {}, child: const Text('FILLED')),
+                  FilledButton(onPressed: null, child: const Text('DISABLED')),
                 ],
               ),
             ),
@@ -122,14 +110,8 @@ class ButtonsPage extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text('TEXT'),
-                  ),
-                  TextButton(
-                    onPressed: null,
-                    child: const Text('DISABLED'),
-                  ),
+                  TextButton(onPressed: () {}, child: const Text('TEXT')),
+                  TextButton(onPressed: null, child: const Text('DISABLED')),
                 ],
               ),
             ),

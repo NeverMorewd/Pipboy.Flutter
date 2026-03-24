@@ -145,9 +145,7 @@ class _ThemeRow extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
-            child: Text('Aa Bb Cc', style: style),
-          ),
+          Expanded(child: Text('Aa Bb Cc', style: style)),
         ],
       ),
     );

@@ -89,8 +89,7 @@ class _NavigationPageState extends State<NavigationPage>
               title: 'NavigationBar',
               child: NavigationBar(
                 selectedIndex: _navBarIndex,
-                onDestinationSelected: (i) =>
-                    setState(() => _navBarIndex = i),
+                onDestinationSelected: (i) => setState(() => _navBarIndex = i),
                 destinations: const [
                   NavigationDestination(
                     icon: Icon(Icons.home_outlined),
@@ -209,13 +208,20 @@ class _NavigationPageState extends State<NavigationPage>
             ),
           ),
           ListTile(
-            leading: Icon(Icons.home_outlined, color: palette.primary, size: 18),
+            leading: Icon(
+              Icons.home_outlined,
+              color: palette.primary,
+              size: 18,
+            ),
             title: const Text('OVERVIEW'),
             onTap: () => Navigator.pop(context),
           ),
           ListTile(
-            leading:
-                Icon(Icons.inventory_2_outlined, color: palette.primary, size: 18),
+            leading: Icon(
+              Icons.inventory_2_outlined,
+              color: palette.primary,
+              size: 18,
+            ),
             title: const Text('INVENTORY'),
             onTap: () => Navigator.pop(context),
           ),
@@ -226,10 +232,12 @@ class _NavigationPageState extends State<NavigationPage>
           ),
           Divider(color: palette.border),
           ListTile(
-            leading:
-                Icon(Icons.settings_outlined, color: palette.textDim, size: 18),
-            title: Text('SETTINGS',
-                style: TextStyle(color: palette.textDim)),
+            leading: Icon(
+              Icons.settings_outlined,
+              color: palette.textDim,
+              size: 18,
+            ),
+            title: Text('SETTINGS', style: TextStyle(color: palette.textDim)),
             onTap: () => Navigator.pop(context),
           ),
         ],
