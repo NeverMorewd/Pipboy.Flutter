@@ -36,12 +36,11 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build web (WASM / CanvasKit)
+      - name: Build web
         run: |
           flutter build web \
             --release \
-            --base-href /Pipboy.Flutter/ \
-            --web-renderer canvaskit
+            --base-href /Pipboy.Flutter/
 
       - name: Disable Jekyll (prevent _framework mangling)
         run: touch build/web/.nojekyll
