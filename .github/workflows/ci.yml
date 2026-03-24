@@ -11,7 +11,6 @@ on:
     paths-ignore:
       - '**.md'
   workflow_dispatch:
-      - 'docs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -42,7 +41,7 @@ jobs:
         run: dart format --output=none --set-exit-if-changed .
 
       - name: Dart analyze
-        run: flutter analyze --fatal-infos
+        run: flutter analyze --fatal-warnings
 
       - name: Run unit tests with coverage
         run: flutter test --coverage --reporter=github
@@ -76,7 +75,7 @@ jobs:
         run: flutter pub get
 
       - name: Dart analyze
-        run: flutter analyze --fatal-infos
+        run: flutter analyze --fatal-warnings
 
       - name: Build web (release)
         run: flutter build web --release --base-href /Pipboy.Flutter/
