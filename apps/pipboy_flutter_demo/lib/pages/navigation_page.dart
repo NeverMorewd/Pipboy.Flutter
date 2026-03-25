@@ -75,14 +75,19 @@ class _NavigationPageState extends State<NavigationPage>
             ),
             DemoSection(
               title: 'PipboyTabStrip',
-              child: PipboyTabbedView(
-                tabs: const ['WEAPONS', 'ARMOR', 'AID', 'MISC'],
-                pages: [
-                  _TabContent('Weapons inventory', palette),
-                  _TabContent('Armor & clothing', palette),
-                  _TabContent('Aid items', palette),
-                  _TabContent('Misc & junk', palette),
-                ],
+              // PipboyTabbedView uses Expanded internally, so it must be
+              // given a bounded height when placed inside a scroll view.
+              child: SizedBox(
+                height: 180,
+                child: PipboyTabbedView(
+                  tabs: const ['WEAPONS', 'ARMOR', 'AID', 'MISC'],
+                  pages: [
+                    _TabContent('Weapons inventory', palette),
+                    _TabContent('Armor & clothing', palette),
+                    _TabContent('Aid items', palette),
+                    _TabContent('Misc & junk', palette),
+                  ],
+                ),
               ),
             ),
             DemoSection(

@@ -13,6 +13,17 @@ import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
 ///   child: Text('ITEMS'),
 /// )
 /// ```
+///
+/// ## Why no Opacity widget
+/// `Opacity` delegates to [RenderOpacity], which calls
+/// `markNeedsSemanticsUpdate()` whenever the opacity crosses the transparent
+/// threshold (0.0 ↔ non-zero).  When a `Positioned` or `Stack` ancestor's
+/// parent-data is dirty in the same frame this raises:
+///
+///   `!semantics.parentDataDirty` assertion in rendering/object.dart
+///
+/// The fix encodes fade transparency directly into the [TextStyle] color
+/// alpha so no [RenderOpacity] node is created.
 class PipboyBracketHighlight extends StatefulWidget {
   const PipboyBracketHighlight({
     super.key,
@@ -89,19 +100,22 @@ class _PipboyBracketHighlightState extends State<PipboyBracketHighlight>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
+        // Encode fade as text color alpha — avoids RenderOpacity entirely.
+        final Color? fadeColor = bracketStyle.color?.withValues(
+          alpha: _fade.value,
+        );
+        final TextStyle fadedStyle = bracketStyle.copyWith(color: fadeColor);
+
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Left bracket fades and slides from left
+            // Left bracket: slides in from left, fades via color alpha.
             ClipRect(
               child: Align(
                 widthFactor: _slide.value,
-                child: Opacity(
-                  opacity: _fade.value,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: Text('>', style: bracketStyle),
-                  ),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Text('>', style: fadedStyle),
                 ),
               ),
             ),
@@ -111,16 +125,13 @@ class _PipboyBracketHighlightState extends State<PipboyBracketHighlight>
               ),
               child: widget.child,
             ),
-            // Right bracket fades and slides from right
+            // Right bracket: slides in from right, fades via color alpha.
             ClipRect(
               child: Align(
                 widthFactor: _slide.value,
-                child: Opacity(
-                  opacity: _fade.value,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: Text('<', style: bracketStyle),
-                  ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Text('<', style: fadedStyle),
                 ),
               ),
             ),
