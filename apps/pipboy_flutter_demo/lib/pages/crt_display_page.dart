@@ -30,25 +30,25 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
               title: 'Effect Toggles',
               child: Column(
                 children: [
-                  SwitchListTile(
+                  PipboySwitchTile(
                     value: _scanlines,
                     onChanged: (v) => setState(() => _scanlines = v),
                     title: const Text('SCANLINES'),
                     contentPadding: EdgeInsets.zero,
                   ),
-                  SwitchListTile(
+                  PipboySwitchTile(
                     value: _scanBeam,
                     onChanged: (v) => setState(() => _scanBeam = v),
                     title: const Text('SCAN BEAM'),
                     contentPadding: EdgeInsets.zero,
                   ),
-                  SwitchListTile(
+                  PipboySwitchTile(
                     value: _vignette,
                     onChanged: (v) => setState(() => _vignette = v),
                     title: const Text('VIGNETTE'),
                     contentPadding: EdgeInsets.zero,
                   ),
-                  SwitchListTile(
+                  PipboySwitchTile(
                     value: _flicker,
                     onChanged: (v) => setState(() => _flicker = v),
                     title: const Text('FLICKER'),

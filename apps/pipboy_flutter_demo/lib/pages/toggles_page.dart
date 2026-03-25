@@ -71,18 +71,16 @@ class _TogglesPageState extends State<TogglesPage> {
             ),
             DemoSection(
               title: 'Radio Button',
-              child: RadioGroup<int>(
-                groupValue: _radio,
-                onChanged: (v) => setState(() => _radio = v ?? _radio),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(
-                    _dropdownItems.length,
-                    (i) => RadioListTile<int>(
-                      value: i,
-                      title: Text(_dropdownItems[i]),
-                      contentPadding: EdgeInsets.zero,
-                    ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: List.generate(
+                  _dropdownItems.length,
+                  (i) => PipboyRadioTile<int>(
+                    value: i,
+                    groupValue: _radio,
+                    onChanged: (v) => setState(() => _radio = v ?? _radio),
+                    title: Text(_dropdownItems[i]),
+                    contentPadding: EdgeInsets.zero,
                   ),
                 ),
               ),

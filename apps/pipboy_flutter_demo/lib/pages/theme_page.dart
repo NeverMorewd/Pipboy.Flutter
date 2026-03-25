@@ -44,13 +44,10 @@ class ThemePage extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
+                          SizedBox(
                             width: 12,
                             height: 12,
-                            decoration: BoxDecoration(
-                              color: entry.value,
-                              shape: BoxShape.circle,
-                            ),
+                            child: ColoredBox(color: entry.value),
                           ),
                           const SizedBox(width: 8),
                           Text(

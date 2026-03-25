@@ -230,6 +230,8 @@ class PipboyTheme {
         thumbShape: const _SquareSliderThumbShape(),
         overlayShape: const _SquareSliderOverlayShape(),
         tickMarkShape: const _SquareSliderTickMarkShape(),
+        // RangeSlider uses a separate thumb type (RangeSliderThumbShape).
+        rangeThumbShape: const _SquareRangeSliderThumbShape(),
       ),
 
       // ── ProgressIndicator ──────────────────────────────────────────────────
@@ -940,6 +942,49 @@ class _SquareSliderTickMarkShape extends SliderTickMarkShape {
         height: tickRadius * 2,
       ),
       Paint()..color = onActive,
+    );
+  }
+}
+
+/// Square thumb for [RangeSlider] — replaces [RoundRangeSliderThumbShape].
+///
+/// [RangeSlider] uses [RangeSliderThumbShape] (a separate type from
+/// [SliderComponentShape]), so it needs its own implementation.
+class _SquareRangeSliderThumbShape extends RangeSliderThumbShape {
+  const _SquareRangeSliderThumbShape();
+
+  static const double halfSize = 6;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
+      const Size(halfSize * 2, halfSize * 2);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    bool isOnTop = false,
+    TextDirection textDirection = TextDirection.ltr,
+    required SliderThemeData sliderTheme,
+    Thumb thumb = Thumb.start,
+    bool isPressed = false,
+  }) {
+    final color = ColorTween(
+      begin: sliderTheme.disabledThumbColor,
+      end: sliderTheme.thumbColor,
+    ).evaluate(enableAnimation);
+    if (color == null) return;
+    context.canvas.drawRect(
+      Rect.fromCenter(
+        center: center,
+        width: halfSize * 2,
+        height: halfSize * 2,
+      ),
+      Paint()..color = color,
     );
   }
 }

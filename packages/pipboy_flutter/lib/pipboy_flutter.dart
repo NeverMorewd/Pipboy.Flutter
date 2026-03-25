@@ -25,6 +25,7 @@ export 'src/widgets/pipboy_countdown.dart';
 export 'src/widgets/pipboy_crt_display.dart';
 // Custom widgets
 export 'src/widgets/pipboy_panel.dart';
+export 'src/widgets/pipboy_radio.dart';
 export 'src/widgets/pipboy_rated_attribute.dart';
 export 'src/widgets/pipboy_scanline_overlay.dart';
 export 'src/widgets/pipboy_segmented_bar.dart';
