@@ -24,6 +24,13 @@ class _MapPageState extends State<MapPage> {
   // Selected defaults for placement
   PipboyMapMarkerKind _markerKind = PipboyMapMarkerKind.pin;
 
+  // Line drawing
+  bool _lineMode = false;
+  Offset? _lineStartWorld; // world-space start of line being drawn
+  PipboyMapLineStyle _lineStyle = PipboyMapLineStyle.solid;
+  int _lineCounter =
+      100; // start id counter high to avoid collision with sample data
+
   // Status bar — use ValueNotifier to avoid rebuilding the whole page on
   // every mouse-move.
   final _cursor = ValueNotifier<Offset?>(null);
@@ -139,6 +146,30 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  // ── Line drawing ───────────────────────────────────────────────────────────
+
+  void _onMapTapped(Offset world) {
+    if (!_lineMode) return;
+    if (_lineStartWorld == null) {
+      // First tap: remember start
+      setState(() => _lineStartWorld = world);
+    } else {
+      // Second tap: create line
+      final start = _lineStartWorld!;
+      final line = PipboyMapLine(
+        id: 'line_${++_lineCounter}',
+        start: start,
+        end: world,
+        style: _lineStyle,
+      );
+      _controller.addLine(line);
+      setState(() {
+        _lineStartWorld = null;
+        _lineMode = false; // exit line mode after drawing
+      });
+    }
+  }
+
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   String _gridLabel(Offset? world) {
@@ -160,6 +191,7 @@ class _MapPageState extends State<MapPage> {
     return Column(
       children: [
         _buildToolbar(palette),
+        if (_lineMode) _buildLineBar(palette),
         _buildMarkerBar(palette),
         Expanded(
           child: PipboyMap(
@@ -168,10 +200,11 @@ class _MapPageState extends State<MapPage> {
             showCrosshair: _showCrosshair,
             showScaleBar: _showScaleBar,
             showMarkerLabels: _showLabels,
-            isMarkerPlacementEnabled: _placementEnabled,
+            isMarkerPlacementEnabled: _placementEnabled || _lineMode,
             defaultMarkerKind: _markerKind,
             defaultMarkerIsBlinking: false,
-            onMarkerAdded: _controller.addMarker,
+            onMarkerAdded: _lineMode ? null : _controller.addMarker,
+            onMapTapped: _onMapTapped,
             onCursorMoved: (pos) => _cursor.value = pos,
             mapBackground: SvgPicture.asset(
               'assets/world.svg',
@@ -230,6 +263,16 @@ class _MapPageState extends State<MapPage> {
             palette: palette,
             onTap: () => setState(() => _placementEnabled = !_placementEnabled),
           ),
+          _ToggleBtn(
+            label: 'LINE',
+            active: _lineMode,
+            palette: palette,
+            onTap: () => setState(() {
+              _lineMode = !_lineMode;
+              if (_lineMode) _placementEnabled = false; // mutually exclusive
+              _lineStartWorld = null;
+            }),
+          ),
           const Spacer(),
           // Zoom controls
           _IconBtn(
@@ -276,6 +319,49 @@ class _MapPageState extends State<MapPage> {
                 _controller.removeMarker(id);
               }
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Line bar ───────────────────────────────────────────────────────────────
+
+  Widget _buildLineBar(PipboyColorPalette palette) {
+    return Container(
+      height: 30,
+      color: palette.selection,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          Text(
+            _lineStartWorld == null
+                ? 'LINE: TAP START POINT'
+                : 'LINE: TAP END POINT',
+            style: TextStyle(
+              fontFamily: PipboyColorPalette.fontFamily,
+              fontSize: 10,
+              color: palette.primary,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(width: 16),
+          for (final style in PipboyMapLineStyle.values)
+            _ToggleBtn(
+              label: style.name.toUpperCase(),
+              active: _lineStyle == style,
+              palette: palette,
+              onTap: () => setState(() => _lineStyle = style),
+            ),
+          const Spacer(),
+          _ToggleBtn(
+            label: 'CANCEL',
+            active: false,
+            palette: palette,
+            onTap: () => setState(() {
+              _lineMode = false;
+              _lineStartWorld = null;
+            }),
           ),
         ],
       ),

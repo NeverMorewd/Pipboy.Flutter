@@ -269,6 +269,7 @@ class PipboyMap extends StatefulWidget {
     this.maxZoom = 10.0,
     this.onMarkerAdded,
     this.onMarkerTapped,
+    this.onMapTapped,
     this.onCursorMoved,
     this.mapBackground,
   });
@@ -304,6 +305,11 @@ class PipboyMap extends StatefulWidget {
   /// Called when the user taps an existing marker.
   final void Function(PipboyMapMarker marker)? onMarkerTapped;
 
+  /// Called whenever the user taps the map (primary button down+up without
+  /// significant movement). Fires regardless of [isMarkerPlacementEnabled].
+  /// World position is in normalised [0,1]×[0,1] coordinates.
+  final void Function(Offset worldPosition)? onMapTapped;
+
   /// Called whenever the cursor moves; `null` when cursor leaves the widget.
   /// Uses a callback rather than exposing internal state to avoid triggering
   /// expensive parent rebuilds — wire to a [ValueNotifier] for efficiency.
@@ -329,8 +335,10 @@ class _PipboyMapState extends State<PipboyMap>
   double _scaleOnStart = 1.0;
   Offset _translationOnStart = Offset.zero;
   Offset? _cursorWorld;
-  bool _didPan = false;
-  Offset _lastFocalPoint = Offset.zero;
+
+  // Raw pointer tracking for reliable tap-to-place
+  Offset?
+  _tapDownPos; // null when primary button is not down (or moved too far)
 
   // ── Animation & blink ─────────────────────────────────────────────────────
   late final AnimationController _animController;
@@ -403,19 +411,12 @@ class _PipboyMapState extends State<PipboyMap>
 
   void _onScaleStart(ScaleStartDetails d) {
     _focalOnStart = d.localFocalPoint;
-    _lastFocalPoint = d.localFocalPoint;
     _scaleOnStart = _scale;
     _translationOnStart = _translation;
-    _didPan = false;
   }
 
   void _onScaleUpdate(ScaleUpdateDetails d) {
     if (!mounted) return;
-    _lastFocalPoint = d.localFocalPoint;
-    if (!_didPan) {
-      final delta = (d.localFocalPoint - _focalOnStart!).distance;
-      if (delta > 4.0 || (d.scale - 1.0).abs() > 0.02) _didPan = true;
-    }
     setState(() {
       if (widget.isZoomEnabled && d.scale != 1.0) {
         final newScale = (_scaleOnStart * d.scale).clamp(
@@ -435,7 +436,39 @@ class _PipboyMapState extends State<PipboyMap>
     widget.onCursorMoved?.call(_cursorWorld);
   }
 
-  void _onPointerMove(PointerEvent event) {
+  void _onPointerDown(PointerDownEvent e) {
+    // Only track primary-button (left-click / single touch)
+    if (e.buttons & 0x01 != 0) {
+      _tapDownPos = e.localPosition;
+    }
+  }
+
+  void _onPointerUp(PointerUpEvent e) {
+    final down = _tapDownPos;
+    _tapDownPos = null;
+    if (down == null) return;
+    if ((e.localPosition - down).distance > 8.0) return;
+    // It was a tap — fire onMapTapped always, and place marker if enabled
+    final world = _screenToWorld(e.localPosition);
+    widget.onMapTapped?.call(world);
+    if (widget.isMarkerPlacementEnabled) {
+      final marker = PipboyMapMarker(
+        id: 'marker_${++_markerCounter}',
+        position: world,
+        kind: widget.defaultMarkerKind,
+        isBlinking: widget.defaultMarkerIsBlinking,
+      );
+      widget.onMarkerAdded?.call(marker);
+    }
+  }
+
+  void _onPointerMoveRaw(PointerEvent event) {
+    // Cancel tap if pointer moved significantly
+    if (_tapDownPos != null &&
+        (event.localPosition - _tapDownPos!).distance > 8.0) {
+      _tapDownPos = null;
+    }
+    // Update cursor world position
     final w = _screenToWorld(event.localPosition);
     if (w != _cursorWorld) {
       setState(() => _cursorWorld = w);
@@ -453,12 +486,6 @@ class _PipboyMapState extends State<PipboyMap>
     if (event is! PointerScrollEvent) return;
     final factor = event.scrollDelta.dy > 0 ? 0.85 : 1.18;
     _zoomStep(factor, focalPoint: event.localPosition);
-  }
-
-  void _onScaleEnd(ScaleEndDetails d) {
-    if (!_didPan && widget.isMarkerPlacementEnabled) {
-      _placeMarker(_lastFocalPoint);
-    }
   }
 
   void _onLongPressStart(LongPressStartDetails d) =>
@@ -495,16 +522,22 @@ class _PipboyMapState extends State<PipboyMap>
                 : SystemMouseCursors.precise,
             onExit: _onPointerExit,
             child: Listener(
-              onPointerMove: _onPointerMove,
+              onPointerDown: _onPointerDown,
+              onPointerUp: _onPointerUp,
+              onPointerMove: _onPointerMoveRaw,
               onPointerSignal: _onScrollWheel,
               child: GestureDetector(
                 onScaleStart: _onScaleStart,
                 onScaleUpdate: _onScaleUpdate,
-                onScaleEnd: _onScaleEnd,
                 onLongPressStart: _onLongPressStart,
                 onSecondaryTapDown: _onSecondaryTapDown,
                 child: Stack(
                   children: [
+                    // Always-present background colour layer
+                    Positioned.fill(
+                      child: ColoredBox(color: palette.background),
+                    ),
+                    // Optional world map / custom background widget (pans & zooms with map)
                     if (widget.mapBackground != null)
                       Positioned.fill(
                         child: ClipRect(
@@ -524,6 +557,7 @@ class _PipboyMapState extends State<PipboyMap>
                           ),
                         ),
                       ),
+                    // Grid, lines, markers drawn on a TRANSPARENT canvas
                     AnimatedBuilder(
                       animation: _animController,
                       builder: (context, _) => CustomPaint(
@@ -542,6 +576,7 @@ class _PipboyMapState extends State<PipboyMap>
                           cursorWorld: _cursorWorld,
                           blinkVisible: _blinkVisible,
                           animValue: _animController.value,
+                          hasBackground: widget.mapBackground != null,
                         ),
                       ),
                     ),
@@ -575,6 +610,7 @@ class _MapPainter extends CustomPainter {
     required this.cursorWorld,
     required this.blinkVisible,
     required this.animValue,
+    required this.hasBackground,
   });
 
   final PipboyColorPalette palette;
@@ -590,6 +626,7 @@ class _MapPainter extends CustomPainter {
   final Offset? cursorWorld;
   final bool blinkVisible;
   final double animValue;
+  final bool hasBackground;
 
   // World → screen coordinate transform.
   Offset _w2s(Offset world) => Offset(
@@ -599,8 +636,10 @@ class _MapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 1 — Background
-    canvas.drawRect(Offset.zero & size, Paint()..color = palette.background);
+    // 1 — Background (skip if a mapBackground widget handles it in the Stack layer below)
+    if (!hasBackground) {
+      canvas.drawRect(Offset.zero & size, Paint()..color = palette.background);
+    }
 
     // 2 — Grid
     if (showGrid) _drawGrid(canvas, size);
