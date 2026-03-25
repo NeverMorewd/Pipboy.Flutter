@@ -80,7 +80,7 @@ class _PipboyBracketHighlightState extends State<PipboyBracketHighlight>
     final bracketStyle =
         widget.bracketStyle ??
         TextStyle(
-          fontFamily: 'Courier New',
+          fontFamily: PipboyColorPalette.fontFamily,
           fontSize: PipboyColorPalette.fontSize,
           color: palette.primary,
           fontWeight: FontWeight.bold,

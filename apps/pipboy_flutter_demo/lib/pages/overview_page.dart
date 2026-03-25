@@ -161,7 +161,7 @@ class _TopBar extends StatelessWidget {
           Text(
             'PIP-BOY 3000 MARK IV',
             style: TextStyle(
-              fontFamily: 'Courier New',
+              fontFamily: PipboyColorPalette.fontFamily,
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: palette.primary,
@@ -172,7 +172,7 @@ class _TopBar extends StatelessWidget {
           PipboyBlinkText(
             '● REC',
             style: TextStyle(
-              fontFamily: 'Courier New',
+              fontFamily: PipboyColorPalette.fontFamily,
               fontSize: 11,
               color: palette.warning,
             ),
@@ -181,7 +181,7 @@ class _TopBar extends StatelessWidget {
           Text(
             'LVL 42',
             style: TextStyle(
-              fontFamily: 'Courier New',
+              fontFamily: PipboyColorPalette.fontFamily,
               fontSize: 11,
               color: palette.textDim,
             ),
@@ -214,7 +214,7 @@ class _StatBar extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontFamily: 'Courier New',
+              fontFamily: PipboyColorPalette.fontFamily,
               fontSize: 11,
               fontWeight: FontWeight.bold,
               color: palette.textDim,
@@ -234,7 +234,7 @@ class _StatBar extends StatelessWidget {
           child: Text(
             '${(value * 100).round()}%',
             style: TextStyle(
-              fontFamily: 'Courier New',
+              fontFamily: PipboyColorPalette.fontFamily,
               fontSize: 10,
               color: palette.textDim,
             ),

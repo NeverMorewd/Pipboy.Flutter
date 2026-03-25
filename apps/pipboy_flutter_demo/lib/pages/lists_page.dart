@@ -51,7 +51,7 @@ class _ListsPageState extends State<ListsPage> {
                     trailing: Text(
                       'x${item.qty}',
                       style: TextStyle(
-                        fontFamily: 'Courier New',
+                        fontFamily: PipboyColorPalette.fontFamily,
                         fontSize: 11,
                         color: palette.textDim,
                       ),
@@ -90,7 +90,7 @@ class _ListsPageState extends State<ListsPage> {
                               child: Text(
                                 item.name,
                                 style: TextStyle(
-                                  fontFamily: 'Courier New',
+                                  fontFamily: PipboyColorPalette.fontFamily,
                                   fontSize: 12,
                                   color: selected
                                       ? palette.primary
@@ -102,7 +102,7 @@ class _ListsPageState extends State<ListsPage> {
                             Text(
                               'x${item.qty}',
                               style: TextStyle(
-                                fontFamily: 'Courier New',
+                                fontFamily: PipboyColorPalette.fontFamily,
                                 fontSize: 11,
                                 color: palette.textDim,
                               ),
@@ -111,7 +111,7 @@ class _ListsPageState extends State<ListsPage> {
                             Text(
                               '${item.weight}kg',
                               style: TextStyle(
-                                fontFamily: 'Courier New',
+                                fontFamily: PipboyColorPalette.fontFamily,
                                 fontSize: 11,
                                 color: palette.textDim,
                               ),

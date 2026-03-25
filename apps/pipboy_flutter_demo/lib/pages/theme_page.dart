@@ -53,7 +53,7 @@ class ThemePage extends StatelessWidget {
                           Text(
                             entry.key.toUpperCase(),
                             style: TextStyle(
-                              fontFamily: 'Courier New',
+                              fontFamily: PipboyColorPalette.fontFamily,
                               fontSize: 10,
                               color: isActive ? palette.primary : palette.text,
                               fontWeight: isActive
@@ -159,8 +159,8 @@ class _PaletteDisplay extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 2),
               child: Text(
                 s.$1.substring(0, s.$1.length.clamp(0, 7)),
-                style: const TextStyle(
-                  fontFamily: 'Courier New',
+                style: TextStyle(
+                  fontFamily: PipboyColorPalette.fontFamily,
                   fontSize: 7,
                   color: Colors.white,
                 ),

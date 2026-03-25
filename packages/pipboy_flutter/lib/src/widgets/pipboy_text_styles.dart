@@ -20,7 +20,7 @@ class PipboyH1 extends StatelessWidget {
       text,
       textAlign: textAlign,
       style: TextStyle(
-        fontFamily: 'Courier New',
+        fontFamily: PipboyColorPalette.fontFamily,
         fontSize: PipboyColorPalette.fontSizeH1,
         fontWeight: FontWeight.bold,
         color: p.primary,
@@ -43,7 +43,7 @@ class PipboyH2 extends StatelessWidget {
       text,
       textAlign: textAlign,
       style: TextStyle(
-        fontFamily: 'Courier New',
+        fontFamily: PipboyColorPalette.fontFamily,
         fontSize: PipboyColorPalette.fontSizeH2,
         fontWeight: FontWeight.bold,
         color: p.primary,
@@ -67,7 +67,7 @@ class PipboyDimText extends StatelessWidget {
       text,
       textAlign: textAlign,
       style: TextStyle(
-        fontFamily: 'Courier New',
+        fontFamily: PipboyColorPalette.fontFamily,
         fontSize: fontSize ?? PipboyColorPalette.fontSize,
         color: p.textDim,
       ),
@@ -96,7 +96,7 @@ class PipboyAccentText extends StatelessWidget {
       text,
       textAlign: textAlign,
       style: TextStyle(
-        fontFamily: 'Courier New',
+        fontFamily: PipboyColorPalette.fontFamily,
         fontSize: fontSize ?? PipboyColorPalette.fontSize,
         color: p.primary,
         fontWeight: bold ? FontWeight.bold : FontWeight.normal,
@@ -118,7 +118,7 @@ class PipboyErrorText extends StatelessWidget {
       text,
       textAlign: textAlign,
       style: TextStyle(
-        fontFamily: 'Courier New',
+        fontFamily: PipboyColorPalette.fontFamily,
         fontSize: PipboyColorPalette.fontSize,
         color: p.error,
       ),
@@ -139,7 +139,7 @@ class PipboyWarningText extends StatelessWidget {
       text,
       textAlign: textAlign,
       style: TextStyle(
-        fontFamily: 'Courier New',
+        fontFamily: PipboyColorPalette.fontFamily,
         fontSize: PipboyColorPalette.fontSize,
         color: p.warning,
       ),
@@ -160,7 +160,7 @@ class PipboySuccessText extends StatelessWidget {
       text,
       textAlign: textAlign,
       style: TextStyle(
-        fontFamily: 'Courier New',
+        fontFamily: PipboyColorPalette.fontFamily,
         fontSize: PipboyColorPalette.fontSize,
         color: p.success,
       ),

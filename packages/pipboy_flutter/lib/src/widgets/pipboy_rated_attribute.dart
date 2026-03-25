@@ -47,7 +47,7 @@ class PipboyRatedAttribute extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontFamily: 'Courier New',
+              fontFamily: PipboyColorPalette.fontFamily,
               fontSize: PipboyColorPalette.fontSizeSmall,
               color: palette.textDim,
               fontWeight: FontWeight.bold,
@@ -72,7 +72,7 @@ class PipboyRatedAttribute extends StatelessWidget {
         Text(
           '$value',
           style: TextStyle(
-            fontFamily: 'Courier New',
+            fontFamily: PipboyColorPalette.fontFamily,
             fontSize: PipboyColorPalette.fontSizeSmall,
             color: palette.primary,
             fontWeight: FontWeight.bold,
@@ -105,7 +105,6 @@ class _Dot extends StatelessWidget {
         decoration: BoxDecoration(
           color: filled ? color : Colors.transparent,
           border: Border.all(color: filled ? color : emptyColor),
-          shape: BoxShape.circle,
         ),
       ),
     );

@@ -121,7 +121,7 @@ class _TogglesPageState extends State<TogglesPage> {
                 isExpanded: true,
                 dropdownColor: palette.surface,
                 style: TextStyle(
-                  fontFamily: 'Courier New',
+                  fontFamily: PipboyColorPalette.fontFamily,
                   fontSize: 13,
                   color: palette.text,
                 ),

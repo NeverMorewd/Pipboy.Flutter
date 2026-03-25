@@ -140,7 +140,7 @@ class PipboyCountdownState extends State<PipboyCountdown> {
           Text(
             widget.label!,
             style: TextStyle(
-              fontFamily: 'Courier New',
+              fontFamily: PipboyColorPalette.fontFamily,
               fontSize: PipboyColorPalette.fontSizeSmall,
               color: palette.textDim,
               letterSpacing: 2.0,
@@ -151,7 +151,7 @@ class PipboyCountdownState extends State<PipboyCountdown> {
         Text(
           _format(_remaining),
           style: TextStyle(
-            fontFamily: 'Courier New',
+            fontFamily: PipboyColorPalette.fontFamily,
             fontSize: fontSize,
             fontWeight: FontWeight.bold,
             color: textColor,

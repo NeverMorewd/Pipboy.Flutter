@@ -68,7 +68,7 @@ class TypographyPage extends StatelessWidget {
                 'ENTER PASSWORD NOW\n\n'
                 '15 ATTEMPTS REMAINING',
                 style: TextStyle(
-                  fontFamily: 'Courier New',
+                  fontFamily: PipboyColorPalette.fontFamily,
                   fontSize: 13,
                   color: palette.primary,
                   height: 1.7,
@@ -80,7 +80,7 @@ class TypographyPage extends StatelessWidget {
               child: RichText(
                 text: TextSpan(
                   style: TextStyle(
-                    fontFamily: 'Courier New',
+                    fontFamily: PipboyColorPalette.fontFamily,
                     fontSize: 13,
                     color: palette.text,
                   ),
@@ -139,7 +139,7 @@ class _ThemeRow extends StatelessWidget {
             child: Text(
               name,
               style: TextStyle(
-                fontFamily: 'Courier New',
+                fontFamily: PipboyColorPalette.fontFamily,
                 fontSize: 9,
                 color: palette.textDim,
               ),

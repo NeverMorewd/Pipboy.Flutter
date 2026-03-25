@@ -147,7 +147,7 @@ class _NavigationPageState extends State<NavigationPage>
                         child: Text(
                           'Section ${_navRailIndex + 1}',
                           style: TextStyle(
-                            fontFamily: 'Courier New',
+                            fontFamily: PipboyColorPalette.fontFamily,
                             color: palette.primary,
                           ),
                         ),
@@ -259,7 +259,7 @@ class _TabContent extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: TextStyle(
-          fontFamily: 'Courier New',
+          fontFamily: PipboyColorPalette.fontFamily,
           fontSize: 12,
           color: palette.textDim,
           letterSpacing: 1.5,

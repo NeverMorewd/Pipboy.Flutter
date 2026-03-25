@@ -19,7 +19,7 @@ class PipboyTheme {
   }
 
   static ThemeData _build(PipboyColorPalette p) {
-    const fontFamily = 'Courier New';
+    final fontFamily = PipboyColorPalette.fontFamily;
     const radius = BorderRadius.zero;
     const shape = RoundedRectangleBorder();
 
@@ -238,7 +238,7 @@ class PipboyTheme {
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: p.primary,
         linearTrackColor: p.border,
-        circularTrackColor: p.border,
+        circularTrackColor: p.surfaceHigh,
         linearMinHeight: 6,
       ),
 
@@ -260,13 +260,13 @@ class PipboyTheme {
       tabBarTheme: TabBarThemeData(
         labelColor: p.primary,
         unselectedLabelColor: p.textDim,
-        labelStyle: const TextStyle(
+        labelStyle: TextStyle(
           fontFamily: fontFamily,
           fontSize: PipboyColorPalette.fontSize,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.5,
         ),
-        unselectedLabelStyle: const TextStyle(
+        unselectedLabelStyle: TextStyle(
           fontFamily: fontFamily,
           fontSize: PipboyColorPalette.fontSize,
           letterSpacing: 1.0,
@@ -485,7 +485,7 @@ class PipboyTheme {
         textColor: p.background,
         smallSize: 6,
         largeSize: 16,
-        textStyle: const TextStyle(
+        textStyle: TextStyle(
           fontFamily: fontFamily,
           fontSize: PipboyColorPalette.fontSizeXSmall,
           fontWeight: FontWeight.bold,

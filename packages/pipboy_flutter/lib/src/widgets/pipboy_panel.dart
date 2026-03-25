@@ -126,7 +126,7 @@ class _TitleBar extends StatelessWidget {
             '─[ ',
             style: TextStyle(
               color: palette.textDim,
-              fontFamily: 'Courier New',
+              fontFamily: PipboyColorPalette.fontFamily,
               fontSize: PipboyColorPalette.fontSizeSmall,
             ),
           ),
@@ -134,7 +134,7 @@ class _TitleBar extends StatelessWidget {
             title,
             style: TextStyle(
               color: palette.primary,
-              fontFamily: 'Courier New',
+              fontFamily: PipboyColorPalette.fontFamily,
               fontSize: PipboyColorPalette.fontSizeSmall,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.5,
@@ -144,7 +144,7 @@ class _TitleBar extends StatelessWidget {
             ' ]─',
             style: TextStyle(
               color: palette.textDim,
-              fontFamily: 'Courier New',
+              fontFamily: PipboyColorPalette.fontFamily,
               fontSize: PipboyColorPalette.fontSizeSmall,
             ),
           ),
@@ -156,7 +156,7 @@ class _TitleBar extends StatelessWidget {
                 '[X]',
                 style: TextStyle(
                   color: palette.textDim,
-                  fontFamily: 'Courier New',
+                  fontFamily: PipboyColorPalette.fontFamily,
                   fontSize: PipboyColorPalette.fontSizeSmall,
                 ),
               ),

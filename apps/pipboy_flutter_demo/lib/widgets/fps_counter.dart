@@ -115,7 +115,7 @@ class _FpsCounterState extends State<FpsCounter> {
             Text(
               'FPS  ${_fps.toStringAsFixed(1).padLeft(5)}',
               style: TextStyle(
-                fontFamily: 'Courier New',
+                fontFamily: PipboyColorPalette.fontFamily,
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 color: color,

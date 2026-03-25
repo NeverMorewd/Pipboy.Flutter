@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pipboy_flutter/src/theme/pipboy_color_palette.dart';
 import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
@@ -12,6 +14,18 @@ import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
 ///   interval: Duration(milliseconds: 500),
 /// )
 /// ```
+///
+/// ## Why Timer instead of AnimationController + Opacity
+/// `Opacity` delegates to [RenderOpacity], which calls
+/// `markNeedsSemanticsUpdate()` every time the opacity value crosses the
+/// transparent threshold (0.0).  When a `Positioned` ancestor's parent-data
+/// is dirty in the same frame this raises:
+///
+///   `!semantics.parentDataDirty` assertion in rendering/object.dart
+///
+/// A [Timer.periodic] toggle avoids [RenderOpacity] entirely: the widget
+/// flips between `style.color` and `Colors.transparent` so layout is
+/// unaffected and no opacity node is ever created.
 class PipboyBlinkText extends StatefulWidget {
   const PipboyBlinkText(
     this.text, {
@@ -32,44 +46,43 @@ class PipboyBlinkText extends StatefulWidget {
   State<PipboyBlinkText> createState() => _PipboyBlinkTextState();
 }
 
-class _PipboyBlinkTextState extends State<PipboyBlinkText>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _opacity;
+class _PipboyBlinkTextState extends State<PipboyBlinkText> {
+  bool _visible = true;
+  Timer? _timer;
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(widget.interval, (_) {
+      if (mounted) setState(() => _visible = !_visible);
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.interval)
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _controller.reverse();
-        } else if (status == AnimationStatus.dismissed) {
-          _controller.forward();
-        }
-      });
-
-    _opacity = Tween<double>(begin: 1.0, end: 0.0).animate(_controller);
-
-    if (widget.enabled) _controller.forward();
+    if (widget.enabled) _startTimer();
   }
 
   @override
   void didUpdateWidget(PipboyBlinkText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.enabled != oldWidget.enabled) {
+    final enabledChanged = widget.enabled != oldWidget.enabled;
+    final intervalChanged = widget.interval != oldWidget.interval;
+    if (enabledChanged || (widget.enabled && intervalChanged)) {
       if (widget.enabled) {
-        _controller.forward();
+        _visible = true;
+        _startTimer();
       } else {
-        _controller.stop();
-        _controller.value = 1.0;
+        _timer?.cancel();
+        _timer = null;
+        if (!_visible) setState(() => _visible = true);
       }
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -79,21 +92,14 @@ class _PipboyBlinkTextState extends State<PipboyBlinkText>
     final style =
         widget.style ??
         TextStyle(
-          fontFamily: 'Courier New',
+          fontFamily: PipboyColorPalette.fontFamily,
           fontSize: PipboyColorPalette.fontSize,
           color: palette.primary,
         );
 
-    if (!widget.enabled) {
-      return Text(widget.text, style: style);
-    }
-
-    return AnimatedBuilder(
-      animation: _opacity,
-      builder: (context, _) => Opacity(
-        opacity: _opacity.value,
-        child: Text(widget.text, style: style),
-      ),
-    );
+    // Render with transparent color when "off" so layout size is preserved.
+    // No Opacity/RenderOpacity involved — avoids the semantics assertion.
+    final effectiveColor = _visible ? style.color : Colors.transparent;
+    return Text(widget.text, style: style.copyWith(color: effectiveColor));
   }
 }

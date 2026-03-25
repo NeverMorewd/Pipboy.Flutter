@@ -68,7 +68,7 @@ class PipboySegmentedBar extends StatelessWidget {
             child: Text(
               label!,
               style: TextStyle(
-                fontFamily: 'Courier New',
+                fontFamily: PipboyColorPalette.fontFamily,
                 fontSize: PipboyColorPalette.fontSizeSmall,
                 color: palette.textDim,
                 fontWeight: FontWeight.bold,

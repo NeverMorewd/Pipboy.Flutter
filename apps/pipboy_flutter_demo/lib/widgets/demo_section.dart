@@ -28,7 +28,7 @@ class DemoSection extends StatelessWidget {
               Text(
                 '// ',
                 style: TextStyle(
-                  fontFamily: 'Courier New',
+                  fontFamily: PipboyColorPalette.fontFamily,
                   fontSize: 11,
                   color: palette.textDim,
                 ),
@@ -36,7 +36,7 @@ class DemoSection extends StatelessWidget {
               Text(
                 title.toUpperCase(),
                 style: TextStyle(
-                  fontFamily: 'Courier New',
+                  fontFamily: PipboyColorPalette.fontFamily,
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: palette.textDim,
@@ -50,7 +50,7 @@ class DemoSection extends StatelessWidget {
             Text(
               description!,
               style: TextStyle(
-                fontFamily: 'Courier New',
+                fontFamily: PipboyColorPalette.fontFamily,
                 fontSize: 10,
                 color: palette.textDim.withAlpha(153),
               ),

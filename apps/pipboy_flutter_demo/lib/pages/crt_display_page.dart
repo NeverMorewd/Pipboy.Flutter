@@ -74,7 +74,7 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
                         Text(
                           'ROBCO INDUSTRIES (TM) TERMLINK PROTOCOL',
                           style: TextStyle(
-                            fontFamily: 'Courier New',
+                            fontFamily: PipboyColorPalette.fontFamily,
                             fontSize: 13,
                             color: palette.primary,
                             fontWeight: FontWeight.bold,
@@ -84,7 +84,7 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
                         Text(
                           'ENTER PASSWORD NOW',
                           style: TextStyle(
-                            fontFamily: 'Courier New',
+                            fontFamily: PipboyColorPalette.fontFamily,
                             fontSize: 13,
                             color: palette.primary,
                           ),
@@ -93,7 +93,7 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
                         Text(
                           '15 ATTEMPT(S) REMAINING: ■ ■ ■ ■',
                           style: TextStyle(
-                            fontFamily: 'Courier New',
+                            fontFamily: PipboyColorPalette.fontFamily,
                             fontSize: 12,
                             color: palette.textDim,
                           ),
@@ -108,7 +108,7 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
                           (line) => Text(
                             line,
                             style: TextStyle(
-                              fontFamily: 'Courier New',
+                              fontFamily: PipboyColorPalette.fontFamily,
                               fontSize: 12,
                               color: palette.primary,
                               letterSpacing: 2,
@@ -121,7 +121,7 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
                             Text(
                               '>',
                               style: TextStyle(
-                                fontFamily: 'Courier New',
+                                fontFamily: PipboyColorPalette.fontFamily,
                                 fontSize: 13,
                                 color: palette.primary,
                               ),
@@ -130,7 +130,7 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
                             PipboyBlinkText(
                               '_',
                               style: TextStyle(
-                                fontFamily: 'Courier New',
+                                fontFamily: PipboyColorPalette.fontFamily,
                                 fontSize: 13,
                                 color: palette.primary,
                               ),
@@ -156,7 +156,7 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
                     child: Text(
                       'SCANLINE EFFECT',
                       style: TextStyle(
-                        fontFamily: 'Courier New',
+                        fontFamily: PipboyColorPalette.fontFamily,
                         fontSize: 14,
                         color: palette.primary,
                         letterSpacing: 3,
@@ -178,7 +178,7 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
                     child: Text(
                       'VIGNETTE EFFECT',
                       style: TextStyle(
-                        fontFamily: 'Courier New',
+                        fontFamily: PipboyColorPalette.fontFamily,
                         fontSize: 14,
                         color: palette.primary,
                         letterSpacing: 3,

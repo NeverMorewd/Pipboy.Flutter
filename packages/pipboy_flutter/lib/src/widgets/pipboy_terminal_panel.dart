@@ -104,7 +104,7 @@ class _PipboyTerminalPanelState extends State<PipboyTerminalPanel> {
           Text(
             displayText,
             style: TextStyle(
-              fontFamily: 'Courier New',
+              fontFamily: PipboyColorPalette.fontFamily,
               fontSize: PipboyColorPalette.fontSize,
               color: palette.primary,
               height: 1.6,
@@ -115,7 +115,7 @@ class _PipboyTerminalPanelState extends State<PipboyTerminalPanel> {
               '_',
               enabled: isComplete,
               style: TextStyle(
-                fontFamily: 'Courier New',
+                fontFamily: PipboyColorPalette.fontFamily,
                 fontSize: PipboyColorPalette.fontSize,
                 color: palette.primary,
               ),

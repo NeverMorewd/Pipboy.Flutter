@@ -95,7 +95,7 @@ class _PipboyTab extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                fontFamily: 'Courier New',
+                fontFamily: PipboyColorPalette.fontFamily,
                 fontSize: PipboyColorPalette.fontSizeSmall,
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                 color: selected ? palette.primary : palette.textDim,

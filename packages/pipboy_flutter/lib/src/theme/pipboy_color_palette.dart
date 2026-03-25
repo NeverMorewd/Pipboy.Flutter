@@ -1,5 +1,7 @@
 import 'dart:math' as math;
+
 import 'package:flutter/painting.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// HSL-space color utilities used by [PipboyColorPalette].
 class PipboyHslColor {
@@ -195,6 +197,14 @@ class PipboyColorPalette {
   final Color success;
 
   // Typography constants
+
+  /// Monospace font family for the Pip-Boy UI.
+  ///
+  /// Uses **Share Tech Mono** (via `google_fonts`) for consistent terminal-style
+  /// rendering across all platforms, including Windows where Courier New renders
+  /// poorly under Flutter's Skia/Impeller backends.
+  static String get fontFamily => GoogleFonts.shareTechMono().fontFamily!;
+
   static const double fontSizeXSmall = 10.0;
   static const double fontSizeSmall = 11.0;
   static const double fontSize = 13.0;

@@ -127,13 +127,13 @@ class _DemoShellState extends State<_DemoShell> {
       backgroundColor: palette.surface,
       selectedItemColor: palette.primary,
       unselectedItemColor: palette.textDim,
-      selectedLabelStyle: const TextStyle(
-        fontFamily: 'Courier New',
+      selectedLabelStyle: TextStyle(
+        fontFamily: PipboyColorPalette.fontFamily,
         fontSize: 10,
         fontWeight: FontWeight.bold,
       ),
-      unselectedLabelStyle: const TextStyle(
-        fontFamily: 'Courier New',
+      unselectedLabelStyle: TextStyle(
+        fontFamily: PipboyColorPalette.fontFamily,
         fontSize: 10,
       ),
       items: _navItems
@@ -181,7 +181,7 @@ class _SideNav extends StatelessWidget {
               child: Text(
                 'PIP-BOY UI',
                 style: TextStyle(
-                  fontFamily: 'Courier New',
+                  fontFamily: PipboyColorPalette.fontFamily,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: palette.primary,
@@ -230,7 +230,7 @@ class _SideNav extends StatelessWidget {
                           Text(
                             item.label,
                             style: TextStyle(
-                              fontFamily: 'Courier New',
+                              fontFamily: PipboyColorPalette.fontFamily,
                               fontSize: 11,
                               fontWeight: selected
                                   ? FontWeight.bold

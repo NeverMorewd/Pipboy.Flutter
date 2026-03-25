@@ -39,7 +39,7 @@ class _SliderProgressPageState extends State<SliderProgressPage> {
                   Text(
                     'Volume: ${(_slider1 * 100).round()}%',
                     style: TextStyle(
-                      fontFamily: 'Courier New',
+                      fontFamily: PipboyColorPalette.fontFamily,
                       fontSize: 11,
                       color: palette.textDim,
                     ),
@@ -62,7 +62,7 @@ class _SliderProgressPageState extends State<SliderProgressPage> {
                   Text(
                     'Radiation: ${_slider2.round()} rads',
                     style: TextStyle(
-                      fontFamily: 'Courier New',
+                      fontFamily: PipboyColorPalette.fontFamily,
                       fontSize: 11,
                       color: palette.textDim,
                     ),
@@ -88,7 +88,7 @@ class _SliderProgressPageState extends State<SliderProgressPage> {
                   Text(
                     'Level range: ${_range.start.round()} – ${_range.end.round()}',
                     style: TextStyle(
-                      fontFamily: 'Courier New',
+                      fontFamily: PipboyColorPalette.fontFamily,
                       fontSize: 11,
                       color: palette.textDim,
                     ),
@@ -110,7 +110,7 @@ class _SliderProgressPageState extends State<SliderProgressPage> {
                   Text(
                     'XP: 75%',
                     style: TextStyle(
-                      fontFamily: 'Courier New',
+                      fontFamily: PipboyColorPalette.fontFamily,
                       fontSize: 11,
                       color: palette.textDim,
                     ),
@@ -121,7 +121,7 @@ class _SliderProgressPageState extends State<SliderProgressPage> {
                   Text(
                     'Download: 30%',
                     style: TextStyle(
-                      fontFamily: 'Courier New',
+                      fontFamily: PipboyColorPalette.fontFamily,
                       fontSize: 11,
                       color: palette.textDim,
                     ),
