@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
 import 'package:pipboy_flutter/src/theme/pipboy_color_palette.dart';
+import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
 
 /// Button variant for [PipboyButton].
 enum PipboyButtonVariant {
@@ -70,20 +70,18 @@ class PipboyButton extends StatelessWidget {
     );
   }
 
-  static ButtonStyle _base(PipboyColorPalette p) => ButtonStyle(
-    elevation: const WidgetStatePropertyAll(0),
-    shadowColor: const WidgetStatePropertyAll(Colors.transparent),
-    surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
-    overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-    minimumSize: const WidgetStatePropertyAll(
+  static ButtonStyle _base(PipboyColorPalette p) => const ButtonStyle(
+    elevation: WidgetStatePropertyAll(0),
+    shadowColor: WidgetStatePropertyAll(Colors.transparent),
+    surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
+    overlayColor: WidgetStatePropertyAll(Colors.transparent),
+    minimumSize: WidgetStatePropertyAll(
       Size(64, PipboyColorPalette.controlHeight),
     ),
-    padding: const WidgetStatePropertyAll(
+    padding: WidgetStatePropertyAll(
       EdgeInsets.symmetric(horizontal: 20, vertical: 10),
     ),
-    shape: const WidgetStatePropertyAll(
-      RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-    ),
+    shape: WidgetStatePropertyAll(RoundedRectangleBorder()),
   );
 
   ButtonStyle _standardStyle(PipboyColorPalette p) => _base(p).copyWith(
@@ -97,12 +95,14 @@ class PipboyButton extends StatelessWidget {
       return p.text;
     }),
     side: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.disabled))
+      if (states.contains(WidgetState.disabled)) {
         return BorderSide(color: p.disabled.withValues(alpha: 0.30));
+      }
       if (states.contains(WidgetState.focused) ||
           states.contains(WidgetState.hovered) ||
-          states.contains(WidgetState.pressed))
+          states.contains(WidgetState.pressed)) {
         return BorderSide(color: p.primary);
+      }
       return BorderSide(color: p.border);
     }),
   );
@@ -115,8 +115,9 @@ class PipboyButton extends StatelessWidget {
       return p.primary;
     }),
     foregroundColor: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.disabled))
+      if (states.contains(WidgetState.disabled)) {
         return p.background.withValues(alpha: 0.70);
+      }
       return p.background;
     }),
     side: const WidgetStatePropertyAll(BorderSide.none),
@@ -135,12 +136,14 @@ class PipboyButton extends StatelessWidget {
       return p.primary;
     }),
     side: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.disabled))
+      if (states.contains(WidgetState.disabled)) {
         return BorderSide(color: p.disabled.withValues(alpha: 0.30));
+      }
       if (states.contains(WidgetState.focused) ||
           states.contains(WidgetState.hovered) ||
-          states.contains(WidgetState.pressed))
+          states.contains(WidgetState.pressed)) {
         return BorderSide(color: p.borderFocus);
+      }
       return BorderSide(color: p.primary);
     }),
   );
@@ -156,11 +159,13 @@ class PipboyButton extends StatelessWidget {
       return p.error;
     }),
     side: WidgetStateProperty.resolveWith((states) {
-      if (states.contains(WidgetState.disabled))
+      if (states.contains(WidgetState.disabled)) {
         return BorderSide(color: p.disabled.withValues(alpha: 0.30));
+      }
       if (states.contains(WidgetState.pressed) ||
-          states.contains(WidgetState.hovered))
+          states.contains(WidgetState.hovered)) {
         return BorderSide(color: p.error.withValues(alpha: 0.70));
+      }
       return BorderSide(color: p.error);
     }),
   );

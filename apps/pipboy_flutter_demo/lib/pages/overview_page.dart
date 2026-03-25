@@ -11,8 +11,8 @@ class OverviewPage extends StatefulWidget {
 
 class _OverviewPageState extends State<OverviewPage> {
   double _hp = 0.85;
-  double _ap = 0.60;
-  double _rad = 0.15;
+  final double _ap = 0.60;
+  final double _rad = 0.15;
   int _tab = 0;
 
   static const _tabs = ['STAT', 'INV', 'DATA', 'MAP', 'RADIO'];

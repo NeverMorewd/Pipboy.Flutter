@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
 import 'package:pipboy_flutter/src/theme/pipboy_color_palette.dart';
+import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
 
 /// Visual variant for [PipboyPanel].
 enum PipboyPanelVariant {
@@ -216,7 +216,7 @@ class _CornerSquare extends StatelessWidget {
       width: 5,
       height: 5,
       child: DecoratedBox(
-        decoration: BoxDecoration(border: Border.all(color: color, width: 1)),
+        decoration: BoxDecoration(border: Border.all(color: color)),
       ),
     );
   }

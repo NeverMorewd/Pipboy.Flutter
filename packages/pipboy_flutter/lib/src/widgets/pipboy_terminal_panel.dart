@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
 import 'package:pipboy_flutter/src/theme/pipboy_color_palette.dart';
+import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
 import 'package:pipboy_flutter/src/widgets/pipboy_blink_text.dart';
 
 /// A terminal-styled container that optionally types out its content
@@ -62,10 +62,11 @@ class _PipboyTerminalPanelState extends State<PipboyTerminalPanel> {
     if (oldWidget.lines != widget.lines) {
       _fullText = widget.lines.join('\n');
       _visibleChars = 0;
-      if (widget.typewriter)
+      if (widget.typewriter) {
         _startTypewriter();
-      else
+      } else {
         setState(() => _visibleChars = _fullText.length);
+      }
     }
   }
 

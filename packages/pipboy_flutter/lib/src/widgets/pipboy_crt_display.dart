@@ -197,9 +197,9 @@ class _ScanBeamPainter extends CustomPainter {
         end: Alignment.bottomCenter,
         colors: [
           Colors.transparent,
-          color.withOpacity(opacity),
-          color.withOpacity(opacity * 1.5),
-          color.withOpacity(opacity),
+          color.withValues(alpha: opacity),
+          color.withValues(alpha: (opacity * 1.5).clamp(0.0, 1.0)),
+          color.withValues(alpha: opacity),
           Colors.transparent,
         ],
       ).createShader(rect);

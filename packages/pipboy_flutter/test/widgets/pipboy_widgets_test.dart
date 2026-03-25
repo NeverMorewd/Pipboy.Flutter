@@ -105,9 +105,7 @@ void main() {
 
     testWidgets('brackets have zero width when selected=false', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          const PipboyBracketHighlight(selected: false, child: Text('ITEM')),
-        ),
+        _wrap(const PipboyBracketHighlight(child: Text('ITEM'))),
       );
       // Brackets exist but are clipped to zero width.
       expect(tester.takeException(), isNull);
@@ -115,9 +113,7 @@ void main() {
 
     testWidgets('child is always rendered', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          const PipboyBracketHighlight(selected: false, child: Text('VISIBLE')),
-        ),
+        _wrap(const PipboyBracketHighlight(child: Text('VISIBLE'))),
       );
       expect(find.text('VISIBLE'), findsOneWidget);
     });
@@ -236,12 +232,7 @@ void main() {
 
     testWidgets('counts down when autoStart=true', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          const PipboyCountdown(
-            duration: Duration(seconds: 3),
-            autoStart: true,
-          ),
-        ),
+        _wrap(const PipboyCountdown(duration: Duration(seconds: 3))),
       );
 
       expect(find.textContaining('00:00:03'), findsOneWidget);
@@ -296,7 +287,6 @@ void main() {
             scanlines: false,
             scanBeam: false,
             vignette: false,
-            flicker: false,
             child: SizedBox(width: 100, height: 100),
           ),
         ),

@@ -10,13 +10,24 @@ void main() {
       final recovered = hsl.toColor();
 
       // Allow ±2 per channel for floating-point rounding.
-      expect((recovered.red - original.red).abs(), lessThanOrEqualTo(2));
-      expect((recovered.green - original.green).abs(), lessThanOrEqualTo(2));
-      expect((recovered.blue - original.blue).abs(), lessThanOrEqualTo(2));
+      int ch(Color c, double Function(Color) f) =>
+          (f(c) * 255.0).round().clamp(0, 255);
+      expect(
+        (ch(recovered, (c) => c.r) - ch(original, (c) => c.r)).abs(),
+        lessThanOrEqualTo(2),
+      );
+      expect(
+        (ch(recovered, (c) => c.g) - ch(original, (c) => c.g)).abs(),
+        lessThanOrEqualTo(2),
+      );
+      expect(
+        (ch(recovered, (c) => c.b) - ch(original, (c) => c.b)).abs(),
+        lessThanOrEqualTo(2),
+      );
     });
 
     test('copyWith overrides only specified fields', () {
-      final hsl = PipboyHslColor(hue: 120, saturation: 0.8, lightness: 0.5);
+      const hsl = PipboyHslColor(hue: 120, saturation: 0.8, lightness: 0.5);
       final copy = hsl.copyWith(lightness: 0.9);
 
       expect(copy.hue, equals(hsl.hue));
@@ -63,7 +74,7 @@ void main() {
       ];
       for (final color in colors) {
         expect(
-          color.alpha,
+          (color.a * 255.0).round(),
           greaterThan(0),
           reason: 'Color $color must not be transparent',
         );

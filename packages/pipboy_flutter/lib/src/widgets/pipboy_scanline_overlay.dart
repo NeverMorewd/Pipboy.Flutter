@@ -134,7 +134,7 @@ class _VignettePainter extends CustomPainter {
         rect.longestSide * 0.7,
         [
           Colors.transparent,
-          Colors.black.withOpacity(intensity.clamp(0.0, 1.0)),
+          Colors.black.withValues(alpha: intensity.clamp(0.0, 1.0)),
         ],
         [0.5, 1.0],
       );

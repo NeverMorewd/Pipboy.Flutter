@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
 import 'package:pipboy_flutter/src/theme/pipboy_color_palette.dart';
+import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
 
 /// A discrete segmented progress bar styled after the HP/AP/RAD bars
 /// in the Pip-Boy HUD.

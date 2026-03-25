@@ -11,24 +11,23 @@
 ///   ),
 /// );
 /// ```
-library pipboy_flutter;
+library;
 
 // Theme core
 export 'src/theme/pipboy_color_palette.dart';
 export 'src/theme/pipboy_theme.dart';
-export 'src/theme/pipboy_theme_manager.dart';
 export 'src/theme/pipboy_theme_data.dart';
-
+export 'src/theme/pipboy_theme_manager.dart';
+export 'src/widgets/pipboy_blink_text.dart';
+export 'src/widgets/pipboy_bracket_highlight.dart';
+export 'src/widgets/pipboy_button.dart';
+export 'src/widgets/pipboy_countdown.dart';
+export 'src/widgets/pipboy_crt_display.dart';
 // Custom widgets
 export 'src/widgets/pipboy_panel.dart';
-export 'src/widgets/pipboy_segmented_bar.dart';
 export 'src/widgets/pipboy_rated_attribute.dart';
-export 'src/widgets/pipboy_blink_text.dart';
 export 'src/widgets/pipboy_scanline_overlay.dart';
-export 'src/widgets/pipboy_bracket_highlight.dart';
-export 'src/widgets/pipboy_crt_display.dart';
+export 'src/widgets/pipboy_segmented_bar.dart';
 export 'src/widgets/pipboy_tab_strip.dart';
 export 'src/widgets/pipboy_terminal_panel.dart';
-export 'src/widgets/pipboy_countdown.dart';
-export 'src/widgets/pipboy_button.dart';
 export 'src/widgets/pipboy_text_styles.dart';

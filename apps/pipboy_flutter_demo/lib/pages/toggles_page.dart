@@ -12,7 +12,7 @@ class TogglesPage extends StatefulWidget {
 class _TogglesPageState extends State<TogglesPage> {
   bool _check1 = true;
   bool _check2 = false;
-  bool _check3 = false;
+  final bool _check3 = false;
   int _radio = 0;
   bool _switch1 = true;
   bool _switch2 = false;
@@ -71,16 +71,18 @@ class _TogglesPageState extends State<TogglesPage> {
             ),
             DemoSection(
               title: 'Radio Button',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: List.generate(
-                  _dropdownItems.length,
-                  (i) => RadioListTile<int>(
-                    value: i,
-                    groupValue: _radio,
-                    onChanged: (v) => setState(() => _radio = v!),
-                    title: Text(_dropdownItems[i]),
-                    contentPadding: EdgeInsets.zero,
+              child: RadioGroup<int>(
+                groupValue: _radio,
+                onChanged: (v) => setState(() => _radio = v ?? _radio),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: List.generate(
+                    _dropdownItems.length,
+                    (i) => RadioListTile<int>(
+                      value: i,
+                      title: Text(_dropdownItems[i]),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
                 ),
               ),

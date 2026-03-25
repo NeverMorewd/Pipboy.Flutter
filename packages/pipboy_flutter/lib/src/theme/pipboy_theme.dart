@@ -21,7 +21,7 @@ class PipboyTheme {
   static ThemeData _build(PipboyColorPalette p) {
     const fontFamily = 'Courier New';
     const radius = BorderRadius.zero;
-    const shape = RoundedRectangleBorder(borderRadius: radius);
+    const shape = RoundedRectangleBorder();
 
     final textTheme = _buildTextTheme(p, fontFamily);
     final colorScheme = _buildColorScheme(p);
@@ -68,10 +68,7 @@ class PipboyTheme {
         color: p.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: radius,
-          side: BorderSide(color: p.border),
-        ),
+        shape: RoundedRectangleBorder(side: BorderSide(color: p.border)),
         margin: EdgeInsets.zero,
       ),
 
@@ -173,7 +170,7 @@ class PipboyTheme {
           return Colors.transparent;
         }),
         side: BorderSide(color: p.border, width: 1.5),
-        shape: const RoundedRectangleBorder(borderRadius: radius),
+        shape: const RoundedRectangleBorder(),
       ),
 
       // ── Radio ──────────────────────────────────────────────────────────────
@@ -317,10 +314,7 @@ class PipboyTheme {
         backgroundColor: p.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: radius,
-          side: BorderSide(color: p.border),
-        ),
+        shape: RoundedRectangleBorder(side: BorderSide(color: p.border)),
         titleTextStyle: TextStyle(
           fontFamily: fontFamily,
           fontSize: PipboyColorPalette.fontSizeH2,
@@ -340,7 +334,7 @@ class PipboyTheme {
         backgroundColor: p.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        shape: const RoundedRectangleBorder(borderRadius: radius),
+        shape: const RoundedRectangleBorder(),
       ),
 
       // ── NavigationBar ──────────────────────────────────────────────────────
@@ -428,10 +422,7 @@ class PipboyTheme {
         color: p.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: radius,
-          side: BorderSide(color: p.border),
-        ),
+        shape: RoundedRectangleBorder(side: BorderSide(color: p.border)),
         textStyle: TextStyle(
           fontFamily: fontFamily,
           fontSize: PipboyColorPalette.fontSize,
@@ -451,10 +442,7 @@ class PipboyTheme {
         backgroundColor: p.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: radius,
-          side: BorderSide(color: p.border),
-        ),
+        shape: RoundedRectangleBorder(side: BorderSide(color: p.border)),
       ),
 
       // ── DropdownMenu ───────────────────────────────────────────────────────
@@ -469,10 +457,7 @@ class PipboyTheme {
           surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
           elevation: const WidgetStatePropertyAll(0),
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: radius,
-              side: BorderSide(color: p.border),
-            ),
+            RoundedRectangleBorder(side: BorderSide(color: p.border)),
           ),
           padding: const WidgetStatePropertyAll(EdgeInsets.zero),
         ),
@@ -510,10 +495,7 @@ class PipboyTheme {
         backgroundColor: p.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: radius,
-          side: BorderSide(color: p.border),
-        ),
+        shape: RoundedRectangleBorder(side: BorderSide(color: p.border)),
         headerBackgroundColor: p.surfaceHigh,
         headerForegroundColor: p.primary,
         dayForegroundColor: WidgetStateProperty.resolveWith((states) {
@@ -551,10 +533,7 @@ class PipboyTheme {
         dayPeriodTextColor: p.text,
         dayPeriodColor: p.surfaceHigh,
         dayPeriodShape: shape,
-        shape: RoundedRectangleBorder(
-          borderRadius: radius,
-          side: BorderSide(color: p.border),
-        ),
+        shape: RoundedRectangleBorder(side: BorderSide(color: p.border)),
         entryModeIconColor: p.primary,
       ),
 
