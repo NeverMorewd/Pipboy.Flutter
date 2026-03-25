@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pipboy_flutter/pipboy_flutter.dart';
+import 'widgets/fps_counter.dart';
 import 'pages/overview_page.dart';
 import 'pages/buttons_page.dart';
 import 'pages/text_input_page.dart';
@@ -92,14 +93,26 @@ class _DemoShellState extends State<_DemoShell> {
               palette: palette,
             ),
             const VerticalDivider(width: 1),
-            Expanded(child: _pages[_selectedIndex]),
+            Expanded(
+              child: Stack(
+                children: [
+                  _pages[_selectedIndex],
+                  const Positioned(top: 8, right: 8, child: FpsCounter()),
+                ],
+              ),
+            ),
           ],
         ),
       );
     }
 
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: Stack(
+        children: [
+          _pages[_selectedIndex],
+          const Positioned(top: 8, right: 8, child: FpsCounter()),
+        ],
+      ),
       bottomNavigationBar: _buildBottomNav(palette),
     );
   }
@@ -202,7 +215,7 @@ class _SideNav extends StatelessWidget {
                             width: 2,
                           ),
                           bottom: BorderSide(
-                            color: palette.border.withAlpha(51),
+                            color: palette.border.withValues(alpha: 0.2),
                           ),
                         ),
                       ),
