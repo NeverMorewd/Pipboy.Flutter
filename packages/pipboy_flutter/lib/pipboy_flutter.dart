@@ -28,6 +28,7 @@ export 'src/widgets/pipboy_panel.dart';
 export 'src/widgets/pipboy_rated_attribute.dart';
 export 'src/widgets/pipboy_scanline_overlay.dart';
 export 'src/widgets/pipboy_segmented_bar.dart';
+export 'src/widgets/pipboy_switch.dart';
 export 'src/widgets/pipboy_tab_strip.dart';
 export 'src/widgets/pipboy_terminal_panel.dart';
 export 'src/widgets/pipboy_text_styles.dart';

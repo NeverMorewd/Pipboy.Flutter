@@ -1,11 +1,25 @@
+import 'dart:async';
+import 'dart:ui' show FramePhase;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:pipboy_flutter/pipboy_flutter.dart';
 
-/// A small Pip-Boy–styled FPS counter overlay.
+/// A Pip-Boy–styled FPS counter overlay.
 ///
-/// Uses [SchedulerBinding.addTimingsCallback] so it works on all platforms
-/// including WASM / CanvasKit web — no platform-specific code required.
+/// ## How FPS is measured
+/// Uses [SchedulerBinding.addTimingsCallback] to receive [FrameTiming] objects.
+/// FPS is derived from the **wall-clock interval between consecutive frame
+/// raster-finish timestamps** — NOT the frame work duration (build+raster time).
+/// Using work duration would show artificially high numbers on fast GPUs that
+/// finish rendering in just a few milliseconds even at a 60 Hz display rate.
+///
+/// ## Why a periodic timer for setState
+/// [SchedulerBinding.addTimingsCallback] fires inside the frame pipeline.
+/// Calling [setState] directly from that callback marks the widget dirty
+/// during the same frame, which triggers the
+/// `!semantics.parentDataDirty` assertion on Windows / desktop.
+/// A [Timer.periodic] fires outside the frame pipeline and is safe.
 class FpsCounter extends StatefulWidget {
   const FpsCounter({super.key});
 
@@ -14,48 +28,61 @@ class FpsCounter extends StatefulWidget {
 }
 
 class _FpsCounterState extends State<FpsCounter> {
-  // Rolling window of recent frame durations (µs).
-  final List<int> _durations = [];
+  // Rolling window of frame intervals in µs (rasterFinish[n] - rasterFinish[n-1]).
+  final List<int> _intervals = [];
+  static const _windowSize = 60;
 
-  /// How many recent frames to average over.
-  static const _windowSize = 30;
+  // Timestamp (µs) of the previous frame's rasterFinish, or null if first frame.
+  int? _prevRasterFinish;
 
+  // Computed FPS, written only by the periodic display timer.
   double _fps = 0;
+
+  // Intermediate value updated by _onTimings; consumed by the display timer.
+  double _pendingFps = 0;
+
+  // Timer that updates the widget at ~2 Hz so we don't rebuild every frame.
+  Timer? _displayTimer;
 
   @override
   void initState() {
     super.initState();
     SchedulerBinding.instance.addTimingsCallback(_onTimings);
+    // Refresh the displayed FPS value twice per second.
+    _displayTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+      if (mounted && (_pendingFps - _fps).abs() > 0.5) {
+        setState(() => _fps = _pendingFps);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _displayTimer?.cancel();
     SchedulerBinding.instance.removeTimingsCallback(_onTimings);
     super.dispose();
   }
 
   void _onTimings(List<FrameTiming> timings) {
     for (final t in timings) {
-      final us = t.totalSpan.inMicroseconds;
-      // On WASM/web the raster phase is browser-managed so totalSpan may
-      // reflect only the build phase. We still use it — any positive value
-      // gives a meaningful FPS reading.
-      if (us > 0) {
-        _durations.add(us);
+      final finish = t.timestampInMicroseconds(FramePhase.rasterFinish);
+      if (_prevRasterFinish != null) {
+        final interval = finish - _prevRasterFinish!;
+        // Sanity-clamp: ignore intervals outside 2 Hz – 1000 Hz (500ms – 1ms).
+        if (interval >= 1000 && interval <= 500000) {
+          _intervals.add(interval);
+        }
       }
+      _prevRasterFinish = finish;
     }
 
-    // Keep only the most recent window.
-    if (_durations.length > _windowSize) {
-      _durations.removeRange(0, _durations.length - _windowSize);
+    while (_intervals.length > _windowSize) {
+      _intervals.removeAt(0);
     }
 
-    if (_durations.isEmpty || !mounted) return;
-
-    final avgUs = _durations.reduce((a, b) => a + b) / _durations.length;
-    final fps = avgUs > 0 ? 1000000 / avgUs : 0.0;
-
-    setState(() => _fps = fps);
+    if (_intervals.isEmpty) return;
+    final avgUs = _intervals.reduce((a, b) => a + b) / _intervals.length;
+    _pendingFps = avgUs > 0 ? 1e6 / avgUs : 0;
   }
 
   Color _fpsColor(PipboyColorPalette palette) {
@@ -78,7 +105,7 @@ class _FpsCounterState extends State<FpsCounter> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Blinking indicator dot — green when smooth, changes color with fps
+          // Square blink dot — Pip-Boy HUD aesthetic (no circles).
           _BlinkDot(color: color),
           const SizedBox(width: 6),
           Text(
@@ -97,7 +124,7 @@ class _FpsCounterState extends State<FpsCounter> {
   }
 }
 
-/// A tiny blinking dot that pulses once per second — Pip-Boy HUD feel.
+/// A 6×6 square that fades in and out — sharp Pip-Boy HUD style.
 class _BlinkDot extends StatefulWidget {
   const _BlinkDot({required this.color});
   final Color color;
@@ -131,10 +158,10 @@ class _BlinkDotState extends State<_BlinkDot>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _anim,
-      child: Container(
+      child: SizedBox(
         width: 6,
         height: 6,
-        decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
+        child: ColoredBox(color: widget.color),
       ),
     );
   }

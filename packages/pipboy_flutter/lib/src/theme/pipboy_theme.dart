@@ -227,9 +227,9 @@ class PipboyTheme {
           fontFamily: fontFamily,
         ),
         trackShape: const RectangularSliderTrackShape(),
-        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-        overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-        tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 2),
+        thumbShape: const _SquareSliderThumbShape(),
+        overlayShape: const _SquareSliderOverlayShape(),
+        tickMarkShape: const _SquareSliderTickMarkShape(),
       ),
 
       // ── ProgressIndicator ──────────────────────────────────────────────────
@@ -818,6 +818,128 @@ class PipboyTheme {
       inverseSurface: p.text,
       onInverseSurface: p.background,
       inversePrimary: p.primaryDark,
+    );
+  }
+}
+
+// ── Custom sharp slider shapes ────────────────────────────────────────────────
+// Flutter's built-in SliderComponentShape subclasses use circles.  These
+// replacements draw rectangles so the slider stays visually consistent with
+// the zero-border-radius Pip-Boy design language.
+
+/// Square thumb — replaces [RoundSliderThumbShape].
+class _SquareSliderThumbShape extends SliderComponentShape {
+  const _SquareSliderThumbShape();
+
+  static const double halfSize = 6;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
+      const Size(halfSize * 2, halfSize * 2);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final color = ColorTween(
+      begin: sliderTheme.disabledThumbColor,
+      end: sliderTheme.thumbColor,
+    ).evaluate(enableAnimation);
+    if (color == null) return;
+    context.canvas.drawRect(
+      Rect.fromCenter(
+        center: center,
+        width: halfSize * 2,
+        height: halfSize * 2,
+      ),
+      Paint()..color = color,
+    );
+  }
+}
+
+/// Square hover/focus overlay — replaces [RoundSliderOverlayShape].
+class _SquareSliderOverlayShape extends SliderComponentShape {
+  const _SquareSliderOverlayShape();
+
+  static const double halfSize = 14;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
+      const Size(halfSize * 2, halfSize * 2);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final color = sliderTheme.overlayColor;
+    if (color == null) return;
+    context.canvas.drawRect(
+      Rect.fromCenter(
+        center: center,
+        width: halfSize * 2,
+        height: halfSize * 2,
+      ),
+      Paint()..color = color,
+    );
+  }
+}
+
+/// Square tick mark — replaces [RoundSliderTickMarkShape].
+class _SquareSliderTickMarkShape extends SliderTickMarkShape {
+  const _SquareSliderTickMarkShape();
+
+  static const double tickRadius = 2;
+
+  @override
+  Size getPreferredSize({
+    required SliderThemeData sliderTheme,
+    required bool isEnabled,
+  }) => const Size(tickRadius * 2, tickRadius * 2);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required Offset thumbCenter,
+    required bool isEnabled,
+    required TextDirection textDirection,
+  }) {
+    final active = sliderTheme.activeTickMarkColor;
+    final inactive = sliderTheme.inactiveTickMarkColor;
+    if (active == null || inactive == null) return;
+    final onActive = center.dx <= thumbCenter.dx ? active : inactive;
+    context.canvas.drawRect(
+      Rect.fromCenter(
+        center: center,
+        width: tickRadius * 2,
+        height: tickRadius * 2,
+      ),
+      Paint()..color = onActive,
     );
   }
 }

@@ -92,19 +92,19 @@ class _TogglesPageState extends State<TogglesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SwitchListTile(
+                  PipboySwitchTile(
                     value: _switch1,
                     onChanged: (v) => setState(() => _switch1 = v),
                     title: const Text('TURRETS ENABLED'),
                     contentPadding: EdgeInsets.zero,
                   ),
-                  SwitchListTile(
+                  PipboySwitchTile(
                     value: _switch2,
                     onChanged: (v) => setState(() => _switch2 = v),
                     title: const Text('ALARM SYSTEM'),
                     contentPadding: EdgeInsets.zero,
                   ),
-                  SwitchListTile(
+                  PipboySwitchTile(
                     value: true,
                     onChanged: null,
                     title: Text(
