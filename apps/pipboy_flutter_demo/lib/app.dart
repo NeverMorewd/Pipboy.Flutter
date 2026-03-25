@@ -96,14 +96,7 @@ class _DemoShellState extends State<_DemoShell> {
               palette: palette,
             ),
             const VerticalDivider(width: 1),
-            Expanded(
-              child: Stack(
-                children: [
-                  _pages[_selectedIndex],
-                  const Positioned(top: 8, right: 8, child: FpsCounter()),
-                ],
-              ),
-            ),
+            Expanded(child: _pages[_selectedIndex]),
           ],
         ),
       );
@@ -180,16 +173,21 @@ class _SideNav extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: palette.border)),
               ),
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'PIP-BOY UI',
-                style: TextStyle(
-                  fontFamily: PipboyColorPalette.fontFamily,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: palette.primary,
-                  letterSpacing: 2.0,
-                ),
+              child: Row(
+                children: [
+                  Text(
+                    'PIP-BOY UI',
+                    style: TextStyle(
+                      fontFamily: PipboyColorPalette.fontFamily,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: palette.primary,
+                      letterSpacing: 2.0,
+                    ),
+                  ),
+                  const Spacer(),
+                  const FpsCounter(),
+                ],
               ),
             ),
             Expanded(

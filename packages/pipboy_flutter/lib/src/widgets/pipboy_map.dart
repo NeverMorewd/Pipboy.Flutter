@@ -270,6 +270,7 @@ class PipboyMap extends StatefulWidget {
     this.onMarkerAdded,
     this.onMarkerTapped,
     this.onCursorMoved,
+    this.mapBackground,
   });
 
   final PipboyMapController controller;
@@ -308,6 +309,10 @@ class PipboyMap extends StatefulWidget {
   /// expensive parent rebuilds — wire to a [ValueNotifier] for efficiency.
   final void Function(Offset? worldPosition)? onCursorMoved;
 
+  /// Optional background widget rendered behind the map overlay.
+  /// Transformed by the current pan/zoom so it scrolls with the map.
+  final Widget? mapBackground;
+
   @override
   State<PipboyMap> createState() => _PipboyMapState();
 }
@@ -324,6 +329,8 @@ class _PipboyMapState extends State<PipboyMap>
   double _scaleOnStart = 1.0;
   Offset _translationOnStart = Offset.zero;
   Offset? _cursorWorld;
+  bool _didPan = false;
+  Offset _lastFocalPoint = Offset.zero;
 
   // ── Animation & blink ─────────────────────────────────────────────────────
   late final AnimationController _animController;
@@ -396,12 +403,19 @@ class _PipboyMapState extends State<PipboyMap>
 
   void _onScaleStart(ScaleStartDetails d) {
     _focalOnStart = d.localFocalPoint;
+    _lastFocalPoint = d.localFocalPoint;
     _scaleOnStart = _scale;
     _translationOnStart = _translation;
+    _didPan = false;
   }
 
   void _onScaleUpdate(ScaleUpdateDetails d) {
     if (!mounted) return;
+    _lastFocalPoint = d.localFocalPoint;
+    if (!_didPan) {
+      final delta = (d.localFocalPoint - _focalOnStart!).distance;
+      if (delta > 4.0 || (d.scale - 1.0).abs() > 0.02) _didPan = true;
+    }
     setState(() {
       if (widget.isZoomEnabled && d.scale != 1.0) {
         final newScale = (_scaleOnStart * d.scale).clamp(
@@ -441,6 +455,12 @@ class _PipboyMapState extends State<PipboyMap>
     _zoomStep(factor, focalPoint: event.localPosition);
   }
 
+  void _onScaleEnd(ScaleEndDetails d) {
+    if (!_didPan && widget.isMarkerPlacementEnabled) {
+      _placeMarker(_lastFocalPoint);
+    }
+  }
+
   void _onLongPressStart(LongPressStartDetails d) =>
       _placeMarker(d.localPosition);
 
@@ -470,7 +490,9 @@ class _PipboyMapState extends State<PipboyMap>
 
         return ClipRect(
           child: MouseRegion(
-            cursor: SystemMouseCursors.precise,
+            cursor: widget.isMarkerPlacementEnabled
+                ? SystemMouseCursors.cell
+                : SystemMouseCursors.precise,
             onExit: _onPointerExit,
             child: Listener(
               onPointerMove: _onPointerMove,
@@ -478,28 +500,52 @@ class _PipboyMapState extends State<PipboyMap>
               child: GestureDetector(
                 onScaleStart: _onScaleStart,
                 onScaleUpdate: _onScaleUpdate,
+                onScaleEnd: _onScaleEnd,
                 onLongPressStart: _onLongPressStart,
                 onSecondaryTapDown: _onSecondaryTapDown,
-                child: AnimatedBuilder(
-                  animation: _animController,
-                  builder: (context, _) => CustomPaint(
-                    size: _mapSize,
-                    painter: _MapPainter(
-                      palette: palette,
-                      markers: widget.controller.markers,
-                      lines: widget.controller.lines,
-                      scale: _scale,
-                      translation: _translation,
-                      mapSize: _mapSize,
-                      showGrid: widget.showGrid,
-                      showCrosshair: widget.showCrosshair,
-                      showScaleBar: widget.showScaleBar,
-                      showMarkerLabels: widget.showMarkerLabels,
-                      cursorWorld: _cursorWorld,
-                      blinkVisible: _blinkVisible,
-                      animValue: _animController.value,
+                child: Stack(
+                  children: [
+                    if (widget.mapBackground != null)
+                      Positioned.fill(
+                        child: ClipRect(
+                          child: Transform(
+                            transform: Matrix4.identity()
+                              ..translateByDouble(
+                                _translation.dx,
+                                _translation.dy,
+                                0.0,
+                                1.0,
+                              )
+                              ..scaleByDouble(_scale, _scale, 1.0, 1.0),
+                            alignment: Alignment.topLeft,
+                            child: SizedBox.expand(
+                              child: widget.mapBackground!,
+                            ),
+                          ),
+                        ),
+                      ),
+                    AnimatedBuilder(
+                      animation: _animController,
+                      builder: (context, _) => CustomPaint(
+                        size: _mapSize,
+                        painter: _MapPainter(
+                          palette: palette,
+                          markers: widget.controller.markers,
+                          lines: widget.controller.lines,
+                          scale: _scale,
+                          translation: _translation,
+                          mapSize: _mapSize,
+                          showGrid: widget.showGrid,
+                          showCrosshair: widget.showCrosshair,
+                          showScaleBar: widget.showScaleBar,
+                          showMarkerLabels: widget.showMarkerLabels,
+                          cursorWorld: _cursorWorld,
+                          blinkVisible: _blinkVisible,
+                          animValue: _animController.value,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -588,10 +634,10 @@ class _MapPainter extends CustomPainter {
 
   void _drawGrid(Canvas canvas, Size size) {
     final linePaint = Paint()
-      ..color = palette.border.withValues(alpha: 0.30)
-      ..strokeWidth = 0.8;
+      ..color = palette.border.withValues(alpha: 0.18)
+      ..strokeWidth = 0.6;
 
-    const labelPaint = TextStyle(fontSize: 9.0, letterSpacing: 0.5);
+    const labelTextStyle = TextStyle(fontSize: 9.0, letterSpacing: 0.5);
     const divisions = 10;
     const cols = 'ABCDEFGHIJ';
 
@@ -600,27 +646,13 @@ class _MapPainter extends CustomPainter {
       final sx = t * mapSize.width * scale + translation.dx;
       final sy = t * mapSize.height * scale + translation.dy;
 
-      // Vertical line
-      if (sx >= -1 && sx <= size.width + 1) {
-        _dashedLine(
-          canvas,
-          Offset(sx, 0),
-          Offset(sx, size.height),
-          linePaint,
-          dashLen: 3,
-          gapLen: 6,
-        );
+      // Vertical line (full height)
+      if (sx >= 0 && sx <= size.width) {
+        canvas.drawLine(Offset(sx, 0), Offset(sx, size.height), linePaint);
       }
-      // Horizontal line
-      if (sy >= -1 && sy <= size.height + 1) {
-        _dashedLine(
-          canvas,
-          Offset(0, sy),
-          Offset(size.width, sy),
-          linePaint,
-          dashLen: 3,
-          gapLen: 6,
-        );
+      // Horizontal line (full width)
+      if (sy >= 0 && sy <= size.height) {
+        canvas.drawLine(Offset(0, sy), Offset(size.width, sy), linePaint);
       }
 
       // Column label (A-J) centred in each cell
@@ -633,7 +665,7 @@ class _MapPainter extends CustomPainter {
             cols[i],
             Offset(midX, 5),
             palette.border.withValues(alpha: 0.55),
-            labelPaint,
+            labelTextStyle,
           );
         }
       }
@@ -647,7 +679,7 @@ class _MapPainter extends CustomPainter {
             '${i + 1}',
             Offset(6, midY),
             palette.border.withValues(alpha: 0.55),
-            labelPaint,
+            labelTextStyle,
           );
         }
       }

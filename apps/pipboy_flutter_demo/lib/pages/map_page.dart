@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pipboy_flutter/pipboy_flutter.dart';
 
 /// Demo page for [PipboyMap] — showcases all marker kinds, line styles,
@@ -172,6 +173,14 @@ class _MapPageState extends State<MapPage> {
             defaultMarkerIsBlinking: false,
             onMarkerAdded: _controller.addMarker,
             onCursorMoved: (pos) => _cursor.value = pos,
+            mapBackground: SvgPicture.asset(
+              'assets/world.svg',
+              fit: BoxFit.fill,
+              colorFilter: ColorFilter.mode(
+                palette.primary.withValues(alpha: 0.18),
+                BlendMode.srcIn,
+              ),
+            ),
           ),
         ),
         _buildStatusBar(palette),
@@ -305,7 +314,7 @@ class _MapPageState extends State<MapPage> {
           ),
           const Spacer(),
           Text(
-            'RIGHT-CLICK OR LONG-PRESS TO PLACE',
+            'TAP / RIGHT-CLICK / LONG-PRESS TO PLACE',
             style: TextStyle(
               fontFamily: PipboyColorPalette.fontFamily,
               fontSize: 8,
