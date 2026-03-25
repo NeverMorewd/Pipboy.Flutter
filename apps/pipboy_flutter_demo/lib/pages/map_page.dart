@@ -177,7 +177,7 @@ class _MapPageState extends State<MapPage> {
               'assets/world.svg',
               fit: BoxFit.fill,
               colorFilter: ColorFilter.mode(
-                palette.primary.withValues(alpha: 0.18),
+                palette.primary.withValues(alpha: 0.40),
                 BlendMode.srcIn,
               ),
             ),
