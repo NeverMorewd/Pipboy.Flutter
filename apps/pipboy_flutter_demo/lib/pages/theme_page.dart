@@ -158,7 +158,7 @@ class _PaletteDisplay extends StatelessWidget {
             color: s.$2,
             alignment: Alignment.bottomCenter,
             child: Container(
-              color: Colors.black.withAlpha(128),
+              color: Colors.black.withValues(alpha: 0.5),
               padding: const EdgeInsets.symmetric(vertical: 2),
               child: Text(
                 s.$1.substring(0, s.$1.length.clamp(0, 7)),
