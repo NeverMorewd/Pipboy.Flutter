@@ -12,6 +12,7 @@ import 'pages/pipboy_controls_page.dart';
 import 'pages/crt_display_page.dart';
 import 'pages/theme_page.dart';
 import 'pages/dialogs_page.dart';
+import 'pages/map_page.dart';
 import 'pages/navigation_page.dart';
 
 class PipboyDemoApp extends StatefulWidget {
@@ -60,6 +61,7 @@ class _DemoShellState extends State<_DemoShell> {
     (icon: Icons.palette_outlined, label: 'THEME'),
     (icon: Icons.chat_bubble_outline, label: 'DIALOGS'),
     (icon: Icons.navigation_outlined, label: 'NAV'),
+    (icon: Icons.map_outlined, label: 'MAP'),
   ];
 
   static const _pages = [
@@ -75,6 +77,7 @@ class _DemoShellState extends State<_DemoShell> {
     ThemePage(),
     DialogsPage(),
     NavigationPage(),
+    MapPage(),
   ];
 
   @override
