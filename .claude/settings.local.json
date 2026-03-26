@@ -10,7 +10,24 @@
       "Bash(grep -rn \"^import ''''\\\\.\\\\.\" lib/src/)",
       "Bash(\"/c/Users/wangd/flutter-sdk/flutter_windows_3.41.5-stable/flutter/bin/flutter\" test:*)",
       "Bash(gh auth:*)",
-      "Bash(gh repo:*)"
+      "Bash(gh repo:*)",
+      "Bash(\"/c/Users/wangd/flutter-sdk/flutter_windows_3.41.5-stable/flutter/bin/flutter.bat\" analyze:*)",
+      "Bash(\"/c/Users/wangd/flutter-sdk/flutter_windows_3.41.5-stable/flutter/bin/dart.bat\" fix:*)",
+      "Bash(flutter pub:*)",
+      "mcp__Windows-MCP__PowerShell",
+      "mcp__Desktop_Commander__interact_with_process",
+      "mcp__Desktop_Commander__read_process_output",
+      "Bash(find /c/Users/wangd/source/repos -maxdepth 2 -type d -name *Avalonia* -o -name *Pipboy*)",
+      "Bash(C:Userswangdflutter-sdkflutter_windows_3.41.5-stableflutterbindart.bat analyze:*)",
+      "mcp__Desktop_Commander__write_file",
+      "Bash(powershell -Command \"Get-Content ''C:\\\\Users\\\\wangd\\\\source\\\\repos\\\\Pipboy.Avalonia\\\\samples\\\\Pipboy.Avalonia.Demo\\\\Data\\\\WorldMapData.cs'' -TotalCount 150\")",
+      "Bash(\"C:\\\\Users\\\\wangd\\\\flutter-sdk\\\\flutter_windows_3.41.5-stable\\\\flutter\\\\bin\\\\flutter.bat\" pub:*)",
+      "Bash(\"C:\\\\Users\\\\wangd\\\\flutter-sdk\\\\flutter_windows_3.41.5-stable\\\\flutter\\\\bin\\\\dart.bat\" analyze:*)",
+      "Bash(C:Userswangdflutter-sdkflutter_windows_3.41.5-stableflutterbindart.bat --version)",
+      "Bash(\"C:\\\\Users\\\\wangd\\\\flutter-sdk\\\\flutter_windows_3.41.5-stable\\\\flutter\\\\bin\\\\dart.bat\" format:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter test:*)",
+      "Bash(dart test:*)"
     ]
   }
 }
