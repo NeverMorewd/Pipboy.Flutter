@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pipboy_flutter/pipboy_flutter.dart';
 
 /// Demo page for [PipboyMap] — showcases all marker kinds, line styles,
-/// pan/zoom, and interactive marker placement.
+/// pan/zoom, interactive placement, and drag/tap-tap line drawing.
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
@@ -21,18 +21,14 @@ class _MapPageState extends State<MapPage> {
   bool _showLabels = true;
   bool _placementEnabled = true;
 
-  // Selected defaults for placement
+  // Selected marker kind for placement
   PipboyMapMarkerKind _markerKind = PipboyMapMarkerKind.pin;
 
   // Line drawing
   bool _lineMode = false;
-  Offset? _lineStartWorld; // world-space start of line being drawn
   PipboyMapLineStyle _lineStyle = PipboyMapLineStyle.solid;
-  int _lineCounter =
-      100; // start id counter high to avoid collision with sample data
 
-  // Status bar — use ValueNotifier to avoid rebuilding the whole page on
-  // every mouse-move.
+  // Status bar — ValueNotifier avoids rebuilding the whole page on mouse-move
   final _cursor = ValueNotifier<Offset?>(null);
 
   @override
@@ -138,36 +134,8 @@ class _MapPageState extends State<MapPage> {
       ),
     ];
 
-    for (final m in ms) {
-      _controller.addMarker(m);
-    }
-    for (final l in ls) {
-      _controller.addLine(l);
-    }
-  }
-
-  // ── Line drawing ───────────────────────────────────────────────────────────
-
-  void _onMapTapped(Offset world) {
-    if (!_lineMode) return;
-    if (_lineStartWorld == null) {
-      // First tap: remember start
-      setState(() => _lineStartWorld = world);
-    } else {
-      // Second tap: create line
-      final start = _lineStartWorld!;
-      final line = PipboyMapLine(
-        id: 'line_${++_lineCounter}',
-        start: start,
-        end: world,
-        style: _lineStyle,
-      );
-      _controller.addLine(line);
-      setState(() {
-        _lineStartWorld = null;
-        _lineMode = false; // exit line mode after drawing
-      });
-    }
+    for (final m in ms) _controller.addMarker(m);
+    for (final l in ls) _controller.addLine(l);
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
@@ -187,45 +155,62 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     final palette = PipboyThemeData.paletteOf(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final layout = _MapLayout(constraints.maxWidth);
+        return Column(
+          children: [
+            _buildToolbar(palette, layout),
+            if (_lineMode) _buildLineBar(palette, layout),
+            _buildMarkerBar(palette, layout),
+            Expanded(child: _buildMap(palette)),
+            _buildStatusBar(palette, layout),
+          ],
+        );
+      },
+    );
+  }
 
-    return Column(
-      children: [
-        _buildToolbar(palette),
-        if (_lineMode) _buildLineBar(palette),
-        _buildMarkerBar(palette),
-        Expanded(
-          child: PipboyMap(
-            controller: _controller,
-            showGrid: _showGrid,
-            showCrosshair: _showCrosshair,
-            showScaleBar: _showScaleBar,
-            showMarkerLabels: _showLabels,
-            isMarkerPlacementEnabled: _placementEnabled || _lineMode,
-            defaultMarkerKind: _markerKind,
-            defaultMarkerIsBlinking: false,
-            onMarkerAdded: _lineMode ? null : _controller.addMarker,
-            onMapTapped: _onMapTapped,
-            onCursorMoved: (pos) => _cursor.value = pos,
-            mapBackground: SvgPicture.asset(
-              'assets/world.svg',
-              fit: BoxFit.fill,
-              colorFilter: ColorFilter.mode(
-                palette.primary.withValues(alpha: 0.40),
-                BlendMode.srcIn,
-              ),
-            ),
-          ),
+  // ── Map ────────────────────────────────────────────────────────────────────
+
+  Widget _buildMap(PipboyColorPalette palette) {
+    return PipboyMap(
+      controller: _controller,
+      showGrid: _showGrid,
+      showCrosshair: _showCrosshair,
+      showScaleBar: _showScaleBar,
+      showMarkerLabels: _showLabels,
+      isMarkerPlacementEnabled: _placementEnabled,
+      isLineDrawingEnabled: _lineMode,
+      defaultMarkerKind: _markerKind,
+      defaultMarkerIsBlinking: false,
+      defaultLineStyle: _lineStyle,
+      // Adding a marker auto-adds it to the controller
+      onMarkerAdded: _controller.addMarker,
+      // Tapping an existing marker removes it
+      onMarkerTapped: (m) => _controller.removeMarker(m.id),
+      // Completing a line auto-adds it and exits line mode
+      onLineAdded: (line) {
+        _controller.addLine(line);
+        setState(() => _lineMode = false);
+      },
+      onCursorMoved: (pos) => _cursor.value = pos,
+      mapBackground: SvgPicture.asset(
+        'assets/world.svg',
+        fit: BoxFit.fill,
+        colorFilter: ColorFilter.mode(
+          palette.primary.withValues(alpha: 0.40),
+          BlendMode.srcIn,
         ),
-        _buildStatusBar(palette),
-      ],
+      ),
     );
   }
 
   // ── Toolbar ────────────────────────────────────────────────────────────────
 
-  Widget _buildToolbar(PipboyColorPalette palette) {
+  Widget _buildToolbar(PipboyColorPalette palette, _MapLayout layout) {
     return Container(
-      height: 38,
+      height: layout.toolbarH,
       decoration: BoxDecoration(
         color: palette.surface,
         border: Border(bottom: BorderSide(color: palette.border)),
@@ -233,135 +218,178 @@ class _MapPageState extends State<MapPage> {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         children: [
-          _ToggleBtn(
-            label: 'GRID',
-            active: _showGrid,
-            palette: palette,
-            onTap: () => setState(() => _showGrid = !_showGrid),
+          // Toggle buttons — scrollable on narrow screens
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _ToggleBtn(
+                    label: 'GRID',
+                    active: _showGrid,
+                    palette: palette,
+                    height: layout.btnH,
+                    fontSize: layout.fontSize,
+                    onTap: () => setState(() => _showGrid = !_showGrid),
+                  ),
+                  _ToggleBtn(
+                    label: 'CROSSHAIR',
+                    active: _showCrosshair,
+                    palette: palette,
+                    height: layout.btnH,
+                    fontSize: layout.fontSize,
+                    onTap: () =>
+                        setState(() => _showCrosshair = !_showCrosshair),
+                  ),
+                  _ToggleBtn(
+                    label: 'SCALE',
+                    active: _showScaleBar,
+                    palette: palette,
+                    height: layout.btnH,
+                    fontSize: layout.fontSize,
+                    onTap: () =>
+                        setState(() => _showScaleBar = !_showScaleBar),
+                  ),
+                  _ToggleBtn(
+                    label: 'LABELS',
+                    active: _showLabels,
+                    palette: palette,
+                    height: layout.btnH,
+                    fontSize: layout.fontSize,
+                    onTap: () => setState(() => _showLabels = !_showLabels),
+                  ),
+                  _ToggleBtn(
+                    label: 'PLACE',
+                    active: _placementEnabled,
+                    palette: palette,
+                    height: layout.btnH,
+                    fontSize: layout.fontSize,
+                    onTap: () =>
+                        setState(() => _placementEnabled = !_placementEnabled),
+                  ),
+                  _ToggleBtn(
+                    label: 'LINE',
+                    active: _lineMode,
+                    palette: palette,
+                    height: layout.btnH,
+                    fontSize: layout.fontSize,
+                    onTap: () => setState(() {
+                      _lineMode = !_lineMode;
+                      if (_lineMode) _placementEnabled = false;
+                    }),
+                  ),
+                ],
+              ),
+            ),
           ),
-          _ToggleBtn(
-            label: 'CROSSHAIR',
-            active: _showCrosshair,
-            palette: palette,
-            onTap: () => setState(() => _showCrosshair = !_showCrosshair),
-          ),
-          _ToggleBtn(
-            label: 'SCALE',
-            active: _showScaleBar,
-            palette: palette,
-            onTap: () => setState(() => _showScaleBar = !_showScaleBar),
-          ),
-          _ToggleBtn(
-            label: 'LABELS',
-            active: _showLabels,
-            palette: palette,
-            onTap: () => setState(() => _showLabels = !_showLabels),
-          ),
-          _ToggleBtn(
-            label: 'PLACE',
-            active: _placementEnabled,
-            palette: palette,
-            onTap: () => setState(() => _placementEnabled = !_placementEnabled),
-          ),
-          _ToggleBtn(
-            label: 'LINE',
-            active: _lineMode,
-            palette: palette,
-            onTap: () => setState(() {
-              _lineMode = !_lineMode;
-              if (_lineMode) _placementEnabled = false; // mutually exclusive
-              _lineStartWorld = null;
-            }),
-          ),
-          const Spacer(),
-          // Zoom controls
+          const SizedBox(width: 6),
+          // Zoom / utility icon buttons
           _IconBtn(
             icon: Icons.add,
             palette: palette,
+            size: layout.iconBtnSz,
+            iconSize: layout.iconSize,
             tooltip: 'Zoom in',
             onTap: _controller.zoomIn,
           ),
           _IconBtn(
             icon: Icons.remove,
             palette: palette,
+            size: layout.iconBtnSz,
+            iconSize: layout.iconSize,
             tooltip: 'Zoom out',
             onTap: _controller.zoomOut,
           ),
           _IconBtn(
             icon: Icons.fit_screen_outlined,
             palette: palette,
+            size: layout.iconBtnSz,
+            iconSize: layout.iconSize,
             tooltip: 'Fit to view',
             onTap: _controller.fitToView,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           _IconBtn(
             icon: Icons.delete_sweep_outlined,
             palette: palette,
-            tooltip: 'Clear placed markers',
-            onTap: () {
-              // Remove only user-placed markers (those not in sample data)
-              final sampleIds = {
-                's_pin',
-                's_flag',
-                's_skull',
-                's_star',
-                's_quest',
-                's_diamond',
-                's_circle',
-                's_cross',
-                's_ripple',
-              };
-              final toRemove = _controller.markers
-                  .where((m) => !sampleIds.contains(m.id))
-                  .map((m) => m.id)
-                  .toList();
-              for (final id in toRemove) {
-                _controller.removeMarker(id);
-              }
-            },
+            size: layout.iconBtnSz,
+            iconSize: layout.iconSize,
+            tooltip: 'Clear placed markers & lines',
+            onTap: _clearUserContent,
           ),
         ],
       ),
     );
   }
 
+  void _clearUserContent() {
+    const sampleMarkerIds = {
+      's_pin', 's_flag', 's_skull', 's_star', 's_quest',
+      's_diamond', 's_circle', 's_cross', 's_ripple',
+    };
+    const sampleLineIds = {'l_solid', 'l_dashed', 'l_dotted', 'l_flow'};
+
+    final markersToRemove = _controller.markers
+        .where((m) => !sampleMarkerIds.contains(m.id))
+        .map((m) => m.id)
+        .toList();
+    for (final id in markersToRemove) _controller.removeMarker(id);
+
+    final linesToRemove = _controller.lines
+        .where((l) => !sampleLineIds.contains(l.id))
+        .map((l) => l.id)
+        .toList();
+    for (final id in linesToRemove) _controller.removeLine(id);
+  }
+
   // ── Line bar ───────────────────────────────────────────────────────────────
 
-  Widget _buildLineBar(PipboyColorPalette palette) {
+  Widget _buildLineBar(PipboyColorPalette palette, _MapLayout layout) {
     return Container(
-      height: 30,
+      height: layout.lineBarH,
       color: palette.selection,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [
           Text(
-            _lineStartWorld == null
-                ? 'LINE: TAP START POINT'
-                : 'LINE: TAP END POINT',
+            'LINE DRAW',
             style: TextStyle(
               fontFamily: PipboyColorPalette.fontFamily,
-              fontSize: 10,
+              fontSize: layout.fontSize,
               color: palette.primary,
-              letterSpacing: 1.2,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
             ),
           ),
-          const SizedBox(width: 16),
-          for (final style in PipboyMapLineStyle.values)
-            _ToggleBtn(
-              label: style.name.toUpperCase(),
-              active: _lineStyle == style,
-              palette: palette,
-              onTap: () => setState(() => _lineStyle = style),
+          const SizedBox(width: 12),
+          // Style selector — scrollable on narrow screens
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: PipboyMapLineStyle.values
+                    .map(
+                      (s) => _ToggleBtn(
+                        label: s.name.toUpperCase(),
+                        active: _lineStyle == s,
+                        palette: palette,
+                        height: layout.btnH - 2,
+                        fontSize: layout.fontSizeSmall,
+                        onTap: () => setState(() => _lineStyle = s),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-          const Spacer(),
+          ),
+          const SizedBox(width: 8),
           _ToggleBtn(
             label: 'CANCEL',
             active: false,
             palette: palette,
-            onTap: () => setState(() {
-              _lineMode = false;
-              _lineStartWorld = null;
-            }),
+            height: layout.btnH - 2,
+            fontSize: layout.fontSize,
+            onTap: () => setState(() => _lineMode = false),
           ),
         ],
       ),
@@ -370,9 +398,16 @@ class _MapPageState extends State<MapPage> {
 
   // ── Marker kind selector ───────────────────────────────────────────────────
 
-  Widget _buildMarkerBar(PipboyColorPalette palette) {
+  Widget _buildMarkerBar(PipboyColorPalette palette, _MapLayout layout) {
+    final labelStyle = TextStyle(
+      fontFamily: PipboyColorPalette.fontFamily,
+      fontSize: layout.fontSizeSmall,
+      color: palette.textDim,
+      letterSpacing: 1.5,
+    );
+
     return Container(
-      height: 34,
+      height: layout.markerBarH,
       decoration: BoxDecoration(
         color: palette.background,
         border: Border(bottom: BorderSide(color: palette.border)),
@@ -380,35 +415,36 @@ class _MapPageState extends State<MapPage> {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         children: [
-          Text(
-            'MARKER:',
-            style: TextStyle(
-              fontFamily: PipboyColorPalette.fontFamily,
-              fontSize: 9,
-              color: palette.textDim,
-              letterSpacing: 1.5,
+          Text('MARKER:', style: labelStyle),
+          const SizedBox(width: 8),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: PipboyMapMarkerKind.values
+                    .map(
+                      (k) => _MarkerKindBtn(
+                        kind: k,
+                        selected: _markerKind == k,
+                        palette: palette,
+                        height: layout.markerBtnH,
+                        fontSize: layout.fontSizeSmall,
+                        onTap: () => setState(() => _markerKind = k),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
           ),
           const SizedBox(width: 8),
-          ...PipboyMapMarkerKind.values.map(
-            (k) => _MarkerKindBtn(
-              kind: k,
-              selected: _markerKind == k,
-              palette: palette,
-              onTap: () => setState(() => _markerKind = k),
-            ),
-          ),
-          const Spacer(),
           Text(
-            'TAP / RIGHT-CLICK / LONG-PRESS TO PLACE',
-            style: TextStyle(
-              fontFamily: PipboyColorPalette.fontFamily,
-              fontSize: 8,
-              color: palette.textDim.withValues(alpha: 0.55),
-              letterSpacing: 1.2,
+            'TAP / LONG-PRESS / RIGHT-CLICK TO PLACE  ·  TAP MARKER TO REMOVE',
+            style: labelStyle.copyWith(
+              fontSize: layout.fontSizeSmall - 1,
+              color: palette.textDim.withValues(alpha: 0.50),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
         ],
       ),
     );
@@ -416,16 +452,16 @@ class _MapPageState extends State<MapPage> {
 
   // ── Status bar ─────────────────────────────────────────────────────────────
 
-  Widget _buildStatusBar(PipboyColorPalette palette) {
+  Widget _buildStatusBar(PipboyColorPalette palette, _MapLayout layout) {
     final labelStyle = TextStyle(
       fontFamily: PipboyColorPalette.fontFamily,
-      fontSize: 9,
+      fontSize: layout.fontSize,
       color: palette.textDim,
       letterSpacing: 1.2,
     );
 
     return Container(
-      height: 26,
+      height: layout.statusBarH,
       decoration: BoxDecoration(
         color: palette.surface,
         border: Border(top: BorderSide(color: palette.border)),
@@ -459,7 +495,9 @@ class _MapPageState extends State<MapPage> {
           const Spacer(),
           Text(
             'PAN: DRAG   ZOOM: SCROLL / PINCH',
-            style: labelStyle.alpha(0.50),
+            style: labelStyle.copyWith(
+              color: palette.textDim.withValues(alpha: 0.50),
+            ),
           ),
         ],
       ),
@@ -476,6 +514,27 @@ class _MapPageState extends State<MapPage> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Responsive layout helper
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _MapLayout {
+  _MapLayout(double width) : _compact = width < 600;
+  final bool _compact;
+
+  double get toolbarH    => _compact ? 48.0 : 44.0;
+  double get lineBarH    => _compact ? 44.0 : 36.0;
+  double get markerBarH  => _compact ? 46.0 : 38.0;
+  double get statusBarH  => _compact ? 36.0 : 30.0;
+  double get btnH        => _compact ? 36.0 : 28.0;
+  double get iconBtnSz   => _compact ? 34.0 : 28.0;
+  double get markerBtnH  => _compact ? 32.0 : 26.0;
+  // Always use the palette's readable size — never below 10px
+  double get fontSize      => PipboyColorPalette.fontSizeSmall; // 11.0
+  double get fontSizeSmall => 10.0;
+  double get iconSize    => _compact ? 18.0 : 15.0;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Local helper widgets
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -485,12 +544,16 @@ class _ToggleBtn extends StatelessWidget {
     required this.active,
     required this.palette,
     required this.onTap,
+    this.height = 28.0,
+    this.fontSize = 11.0,
   });
 
   final String label;
   final bool active;
   final PipboyColorPalette palette;
   final VoidCallback onTap;
+  final double height;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -499,9 +562,9 @@ class _ToggleBtn extends StatelessWidget {
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: Container(
-          height: 24,
+          height: height,
           margin: const EdgeInsets.only(right: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             color: active ? palette.selection : Colors.transparent,
             border: Border.all(
@@ -513,7 +576,7 @@ class _ToggleBtn extends StatelessWidget {
             label,
             style: TextStyle(
               fontFamily: PipboyColorPalette.fontFamily,
-              fontSize: 9,
+              fontSize: fontSize,
               color: active ? palette.primary : palette.textDim,
               letterSpacing: 1.2,
             ),
@@ -529,12 +592,16 @@ class _IconBtn extends StatelessWidget {
     required this.icon,
     required this.palette,
     required this.onTap,
+    this.size = 28.0,
+    this.iconSize = 15.0,
     this.tooltip,
   });
 
   final IconData icon;
   final PipboyColorPalette palette;
   final VoidCallback onTap;
+  final double size;
+  final double iconSize;
   final String? tooltip;
 
   @override
@@ -544,11 +611,11 @@ class _IconBtn extends StatelessWidget {
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: Container(
-          width: 26,
-          height: 26,
+          width: size,
+          height: size,
           margin: const EdgeInsets.only(left: 2),
           decoration: BoxDecoration(border: Border.all(color: palette.border)),
-          child: Icon(icon, size: 14, color: palette.primary),
+          child: Icon(icon, size: iconSize, color: palette.primary),
         ),
       ),
     );
@@ -556,30 +623,33 @@ class _IconBtn extends StatelessWidget {
   }
 }
 
-/// Small button showing a marker icon for the kind-selector bar.
 class _MarkerKindBtn extends StatelessWidget {
   const _MarkerKindBtn({
     required this.kind,
     required this.selected,
     required this.palette,
     required this.onTap,
+    this.height = 26.0,
+    this.fontSize = 10.0,
   });
 
   final PipboyMapMarkerKind kind;
   final bool selected;
   final PipboyColorPalette palette;
   final VoidCallback onTap;
+  final double height;
+  final double fontSize;
 
   static const _labels = {
-    PipboyMapMarkerKind.pin: 'PIN',
-    PipboyMapMarkerKind.flag: 'FLAG',
-    PipboyMapMarkerKind.star: 'STAR',
-    PipboyMapMarkerKind.skull: 'SKULL',
+    PipboyMapMarkerKind.pin:     'PIN',
+    PipboyMapMarkerKind.flag:    'FLAG',
+    PipboyMapMarkerKind.star:    'STAR',
+    PipboyMapMarkerKind.skull:   'SKULL',
     PipboyMapMarkerKind.diamond: 'DMD',
-    PipboyMapMarkerKind.circle: 'DOT',
-    PipboyMapMarkerKind.cross: 'CROSS',
-    PipboyMapMarkerKind.quest: '(!)  ',
-    PipboyMapMarkerKind.ripple: 'SIG',
+    PipboyMapMarkerKind.circle:  'DOT',
+    PipboyMapMarkerKind.cross:   'CROSS',
+    PipboyMapMarkerKind.quest:   '(!)',
+    PipboyMapMarkerKind.ripple:  'SIG',
   };
 
   @override
@@ -590,9 +660,9 @@ class _MarkerKindBtn extends StatelessWidget {
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: Container(
-          height: 22,
+          height: height,
           margin: const EdgeInsets.only(right: 3),
-          padding: const EdgeInsets.symmetric(horizontal: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
             color: selected ? palette.selection : Colors.transparent,
             border: Border.all(
@@ -605,7 +675,7 @@ class _MarkerKindBtn extends StatelessWidget {
             label,
             style: TextStyle(
               fontFamily: PipboyColorPalette.fontFamily,
-              fontSize: 8,
+              fontSize: fontSize,
               color: selected ? palette.primary : palette.textDim,
               letterSpacing: 0.8,
             ),
@@ -614,9 +684,4 @@ class _MarkerKindBtn extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Extension to adjust text style opacity conveniently.
-extension on TextStyle {
-  TextStyle alpha(double a) => copyWith(color: color?.withValues(alpha: a));
 }

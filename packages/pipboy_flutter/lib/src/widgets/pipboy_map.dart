@@ -93,7 +93,6 @@ class PipboyMapMarker {
   /// Arbitrary application payload — not rendered.
   final Object? tag;
 
-  /// Returns a copy with the given fields replaced.
   PipboyMapMarker copyWith({
     String? id,
     Offset? position,
@@ -152,22 +151,11 @@ class PipboyMapLine {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Mutable controller for [PipboyMap] markers, lines, and view state.
-///
-/// Extend with [ChangeNotifier] so that widgets listening to this controller
-/// (e.g. via [ListenableBuilder]) rebuild when its content changes.
-///
-/// ```dart
-/// final controller = PipboyMapController();
-/// controller.addMarker(const PipboyMapMarker(id: '1', position: Offset(0.5, 0.5)));
-/// ```
 class PipboyMapController extends ChangeNotifier {
   final List<PipboyMapMarker> _markers = [];
   final List<PipboyMapLine> _lines = [];
 
-  /// Read-only view of current markers.
   List<PipboyMapMarker> get markers => List.unmodifiable(_markers);
-
-  /// Read-only view of current lines.
   List<PipboyMapLine> get lines => List.unmodifiable(_lines);
 
   // ── Markers ────────────────────────────────────────────────────────────────
@@ -224,13 +212,8 @@ class PipboyMapController extends ChangeNotifier {
   void _attach(_PipboyMapState s) => _state = s;
   void _detach() => _state = null;
 
-  /// Resets zoom to 1× and pan to origin.
   void fitToView() => _state?._fitToView();
-
-  /// Zooms in by 25 %.
   void zoomIn() => _state?._zoomStep(1.25);
-
-  /// Zooms out by 20 %.
   void zoomOut() => _state?._zoomStep(0.8);
 }
 
@@ -238,18 +221,20 @@ class PipboyMapController extends ChangeNotifier {
 // Widget
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// A Pip-Boy styled interactive map with pan, zoom, markers, and lines.
+/// A Pip-Boy styled interactive map with pan, zoom, markers, lines, and
+/// interactive line-drawing mode.
 ///
-/// All mutable content (markers, lines, view state) is managed through a
-/// [PipboyMapController].  Display options (grid, crosshair …) are set via
-/// widget properties and can be changed with [setState] in the parent.
+/// All mutable content is managed through a [PipboyMapController].
+/// Display options are set via widget properties.
 ///
 /// ```dart
 /// PipboyMap(
 ///   controller: _controller,
 ///   showGrid: true,
 ///   isMarkerPlacementEnabled: true,
+///   isLineDrawingEnabled: _lineMode,
 ///   onMarkerAdded: (m) => _controller.addMarker(m),
+///   onLineAdded: (l) => _controller.addLine(l),
 /// )
 /// ```
 class PipboyMap extends StatefulWidget {
@@ -263,12 +248,16 @@ class PipboyMap extends StatefulWidget {
     this.isPanEnabled = true,
     this.isZoomEnabled = true,
     this.isMarkerPlacementEnabled = false,
+    this.isLineDrawingEnabled = false,
     this.defaultMarkerKind = PipboyMapMarkerKind.pin,
     this.defaultMarkerIsBlinking = false,
+    this.defaultLineStyle = PipboyMapLineStyle.solid,
+    this.defaultLineIsThick = false,
     this.minZoom = 0.5,
     this.maxZoom = 10.0,
     this.onMarkerAdded,
     this.onMarkerTapped,
+    this.onLineAdded,
     this.onMapTapped,
     this.onCursorMoved,
     this.mapBackground,
@@ -276,47 +265,48 @@ class PipboyMap extends StatefulWidget {
 
   final PipboyMapController controller;
 
-  /// Whether to draw the 10×10 coordinate grid.
   final bool showGrid;
-
-  /// Whether to draw dashed crosshair lines at the cursor.
   final bool showCrosshair;
-
-  /// Whether to draw a scale bar in the bottom-left corner.
   final bool showScaleBar;
-
-  /// Whether to draw text labels below markers.
   final bool showMarkerLabels;
-
   final bool isPanEnabled;
   final bool isZoomEnabled;
 
   /// When `true`, right-click / long-press places a new marker.
   final bool isMarkerPlacementEnabled;
+
+  /// When `true`, drag or tap-twice draws a line instead of panning.
+  /// Zoom still works while line drawing is active.
+  final bool isLineDrawingEnabled;
+
   final PipboyMapMarkerKind defaultMarkerKind;
   final bool defaultMarkerIsBlinking;
+
+  /// Default style for lines drawn interactively.
+  final PipboyMapLineStyle defaultLineStyle;
+
+  /// When `true`, interactively drawn lines use thick stroke.
+  final bool defaultLineIsThick;
+
   final double minZoom;
   final double maxZoom;
 
   /// Called when the user places a new marker (right-click / long-press).
-  /// The caller is responsible for adding it to [controller] if desired.
   final void Function(PipboyMapMarker marker)? onMarkerAdded;
 
-  /// Called when the user taps an existing marker.
+  /// Called when the user taps an existing marker (primary button).
   final void Function(PipboyMapMarker marker)? onMarkerTapped;
 
-  /// Called whenever the user taps the map (primary button down+up without
-  /// significant movement). Fires regardless of [isMarkerPlacementEnabled].
-  /// World position is in normalised [0,1]×[0,1] coordinates.
+  /// Called when the user completes drawing a line (drag or tap-twice).
+  final void Function(PipboyMapLine line)? onLineAdded;
+
+  /// Called whenever the user taps the map (not on a marker, not drawing).
   final void Function(Offset worldPosition)? onMapTapped;
 
   /// Called whenever the cursor moves; `null` when cursor leaves the widget.
-  /// Uses a callback rather than exposing internal state to avoid triggering
-  /// expensive parent rebuilds — wire to a [ValueNotifier] for efficiency.
   final void Function(Offset? worldPosition)? onCursorMoved;
 
   /// Optional background widget rendered behind the map overlay.
-  /// Transformed by the current pan/zoom so it scrolls with the map.
   final Widget? mapBackground;
 
   @override
@@ -336,9 +326,15 @@ class _PipboyMapState extends State<PipboyMap>
   Offset _translationOnStart = Offset.zero;
   Offset? _cursorWorld;
 
-  // Raw pointer tracking for reliable tap-to-place
-  Offset?
-  _tapDownPos; // null when primary button is not down (or moved too far)
+  // Primary-button tap tracking (non-line-drawing mode only)
+  Offset? _tapDownPos;
+
+  // ── Line drawing state ─────────────────────────────────────────────────────
+  Offset? _lineDrawStart;        // world coords — confirmed start point
+  Offset? _lineDrawStartScreen;  // screen coords — drag distance detection
+  Offset? _lineDrawCurrent;      // world coords — live preview end (cursor)
+  bool _lineHasPendingStart = false; // tap-tap: first tap done, awaiting second
+  int _lineCounter = 0;
 
   // ── Animation & blink ─────────────────────────────────────────────────────
   late final AnimationController _animController;
@@ -372,6 +368,14 @@ class _PipboyMapState extends State<PipboyMap>
       old.controller.removeListener(_onControllerChanged);
       widget.controller._attach(this);
       widget.controller.addListener(_onControllerChanged);
+    }
+    // Reset line drawing state when mode is turned off
+    if (old.isLineDrawingEnabled && !widget.isLineDrawingEnabled) {
+      _lineDrawStart = null;
+      _lineDrawStartScreen = null;
+      _lineDrawCurrent = null;
+      _lineHasPendingStart = false;
+      // No setState needed — didUpdateWidget is always followed by a rebuild
     }
   }
 
@@ -427,7 +431,8 @@ class _PipboyMapState extends State<PipboyMap>
             d.localFocalPoint +
             (_translationOnStart - _focalOnStart!) * (newScale / _scaleOnStart);
         _scale = newScale;
-      } else if (widget.isPanEnabled) {
+      } else if (widget.isPanEnabled && !widget.isLineDrawingEnabled) {
+        // Pan is suppressed in line drawing mode; zoom still works
         _translation =
             _translationOnStart + (d.localFocalPoint - _focalOnStart!);
       }
@@ -437,18 +442,39 @@ class _PipboyMapState extends State<PipboyMap>
   }
 
   void _onPointerDown(PointerDownEvent e) {
-    // Only track primary-button (left-click / single touch)
-    if (e.buttons & 0x01 != 0) {
+    if (e.buttons & 0x01 == 0) return;
+    if (widget.isLineDrawingEnabled) {
+      // Capture start for line drawing; ignore extra fingers
+      if (_lineDrawStartScreen == null) {
+        _lineDrawStartScreen = e.localPosition;
+      }
+    } else {
       _tapDownPos = e.localPosition;
     }
   }
 
   void _onPointerUp(PointerUpEvent e) {
+    if (widget.isLineDrawingEnabled) {
+      final startScreen = _lineDrawStartScreen;
+      _lineDrawStartScreen = null;
+      if (startScreen == null) return;
+      final isDrag = (e.localPosition - startScreen).distance > 8.0;
+      _handleLinePointerUp(e.localPosition, startScreen, isDrag);
+      return;
+    }
+
     final down = _tapDownPos;
     _tapDownPos = null;
     if (down == null) return;
     if ((e.localPosition - down).distance > 8.0) return;
-    // It was a tap — fire onMapTapped always, and place marker if enabled
+
+    // Hit-test existing markers first
+    final hit = _hitTestMarker(e.localPosition);
+    if (hit != null) {
+      widget.onMarkerTapped?.call(hit);
+      return;
+    }
+
     final world = _screenToWorld(e.localPosition);
     widget.onMapTapped?.call(world);
     if (widget.isMarkerPlacementEnabled) {
@@ -462,16 +488,85 @@ class _PipboyMapState extends State<PipboyMap>
     }
   }
 
-  void _onPointerMoveRaw(PointerEvent event) {
-    // Cancel tap if pointer moved significantly
-    if (_tapDownPos != null &&
-        (event.localPosition - _tapDownPos!).distance > 8.0) {
-      _tapDownPos = null;
+  void _handleLinePointerUp(
+    Offset screenPos,
+    Offset startScreen,
+    bool isDrag,
+  ) {
+    if (isDrag) {
+      // Drag-to-draw: commit the line immediately on release
+      _commitLine(_screenToWorld(startScreen), _screenToWorld(screenPos));
+      setState(() {
+        _lineDrawStart = null;
+        _lineDrawCurrent = null;
+        _lineHasPendingStart = false;
+      });
+      return;
     }
-    // Update cursor world position
+
+    // Tap-tap mode
+    final worldPos = _screenToWorld(screenPos);
+    if (!_lineHasPendingStart) {
+      // First tap: record the start point
+      setState(() {
+        _lineDrawStart = worldPos;
+        _lineDrawCurrent = worldPos;
+        _lineHasPendingStart = true;
+      });
+    } else {
+      // Second tap: commit the line
+      _commitLine(_lineDrawStart!, worldPos);
+      setState(() {
+        _lineDrawStart = null;
+        _lineDrawCurrent = null;
+        _lineHasPendingStart = false;
+      });
+    }
+  }
+
+  void _commitLine(Offset worldStart, Offset worldEnd) {
+    if ((worldEnd - worldStart).distance < 0.005) return; // degenerate guard
+    widget.onLineAdded?.call(PipboyMapLine(
+      id: 'line_${++_lineCounter}',
+      start: worldStart,
+      end: worldEnd,
+      style: widget.defaultLineStyle,
+      isThick: widget.defaultLineIsThick,
+    ));
+  }
+
+  /// Returns the topmost visible marker within [hitRadius] screen pixels of
+  /// [screenPos], or `null` if none.
+  PipboyMapMarker? _hitTestMarker(Offset screenPos) {
+    const hitRadius = 14.0;
+    for (final m in widget.controller.markers.reversed) {
+      if (!m.isVisible) continue;
+      final mScreen = Offset(
+        m.position.dx * _mapSize.width * _scale + _translation.dx,
+        m.position.dy * _mapSize.height * _scale + _translation.dy,
+      );
+      if ((screenPos - mScreen).distance <= hitRadius) return m;
+    }
+    return null;
+  }
+
+  void _onPointerMoveRaw(PointerEvent event) {
+    // Cancel tap if pointer moved significantly (only outside line mode)
+    if (!widget.isLineDrawingEnabled) {
+      if (_tapDownPos != null &&
+          (event.localPosition - _tapDownPos!).distance > 8.0) {
+        _tapDownPos = null;
+      }
+    }
+    // Update cursor world position and line preview end
     final w = _screenToWorld(event.localPosition);
-    if (w != _cursorWorld) {
-      setState(() => _cursorWorld = w);
+    final lineCurrentChanged =
+        widget.isLineDrawingEnabled && w != _lineDrawCurrent;
+    if (w != _cursorWorld || lineCurrentChanged) {
+      setState(() {
+        _cursorWorld = w;
+        if (widget.isLineDrawingEnabled) _lineDrawCurrent = w;
+      });
       widget.onCursorMoved?.call(w);
     }
   }
@@ -511,15 +606,24 @@ class _PipboyMapState extends State<PipboyMap>
   Widget build(BuildContext context) {
     final palette = PipboyThemeData.paletteOf(context);
 
+    // Line preview: only show when start is confirmed (pending second tap or
+    // pointer is held down for drag)
+    final linePreviewStart =
+        widget.isLineDrawingEnabled ? _lineDrawStart : null;
+    final linePreviewEnd =
+        widget.isLineDrawingEnabled ? _lineDrawCurrent : null;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         _mapSize = Size(constraints.maxWidth, constraints.maxHeight);
 
         return ClipRect(
           child: MouseRegion(
-            cursor: widget.isMarkerPlacementEnabled
-                ? SystemMouseCursors.cell
-                : SystemMouseCursors.precise,
+            cursor: widget.isLineDrawingEnabled
+                ? SystemMouseCursors.precise
+                : widget.isMarkerPlacementEnabled
+                    ? SystemMouseCursors.cell
+                    : SystemMouseCursors.precise,
             onExit: _onPointerExit,
             child: Listener(
               onPointerDown: _onPointerDown,
@@ -533,11 +637,11 @@ class _PipboyMapState extends State<PipboyMap>
                 onSecondaryTapDown: _onSecondaryTapDown,
                 child: Stack(
                   children: [
-                    // Always-present background colour layer
+                    // Background colour layer
                     Positioned.fill(
                       child: ColoredBox(color: palette.background),
                     ),
-                    // Optional world map / custom background widget (pans & zooms with map)
+                    // Optional world map background (pans & zooms with map)
                     if (widget.mapBackground != null)
                       Positioned.fill(
                         child: ClipRect(
@@ -557,7 +661,7 @@ class _PipboyMapState extends State<PipboyMap>
                           ),
                         ),
                       ),
-                    // Grid, lines, markers drawn on a TRANSPARENT canvas
+                    // Grid, lines, markers, crosshair, previews
                     AnimatedBuilder(
                       animation: _animController,
                       builder: (context, _) => CustomPaint(
@@ -577,6 +681,8 @@ class _PipboyMapState extends State<PipboyMap>
                           blinkVisible: _blinkVisible,
                           animValue: _animController.value,
                           hasBackground: widget.mapBackground != null,
+                          linePreviewStart: linePreviewStart,
+                          linePreviewEnd: linePreviewEnd,
                         ),
                       ),
                     ),
@@ -611,6 +717,8 @@ class _MapPainter extends CustomPainter {
     required this.blinkVisible,
     required this.animValue,
     required this.hasBackground,
+    this.linePreviewStart,
+    this.linePreviewEnd,
   });
 
   final PipboyColorPalette palette;
@@ -628,6 +736,12 @@ class _MapPainter extends CustomPainter {
   final double animValue;
   final bool hasBackground;
 
+  /// World-space start of an in-progress line draw — draws animated preview.
+  final Offset? linePreviewStart;
+
+  /// World-space end of the line preview (current cursor position).
+  final Offset? linePreviewEnd;
+
   // World → screen coordinate transform.
   Offset _w2s(Offset world) => Offset(
     world.dx * mapSize.width * scale + translation.dx,
@@ -636,7 +750,7 @@ class _MapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 1 — Background (skip if a mapBackground widget handles it in the Stack layer below)
+    // 1 — Background
     if (!hasBackground) {
       canvas.drawRect(Offset.zero & size, Paint()..color = palette.background);
     }
@@ -657,68 +771,95 @@ class _MapPainter extends CustomPainter {
       _drawMarker(canvas, m, size);
     }
 
-    // 5 — Crosshair (screen space, drawn after canvas elements)
+    // 5 — Line drawing preview (before crosshair so crosshair renders on top)
+    if (linePreviewStart != null && linePreviewEnd != null) {
+      _drawLinePreview(canvas, linePreviewStart!, linePreviewEnd!);
+    }
+
+    // 6 — Crosshair (screen space)
     if (showCrosshair && cursorWorld != null) {
       _drawCrosshair(canvas, size);
     }
 
-    // 6 — Scale bar (screen space, fixed position)
+    // 7 — Scale bar
     if (showScaleBar) _drawScaleBar(canvas, size);
 
-    // 7 — Corner brackets (Pip-Boy aesthetic frame)
+    // 8 — Zoom indicator
+    _drawZoomIndicator(canvas, size);
+
+    // 9 — Corner brackets
     _drawCornerBrackets(canvas, size);
   }
 
   // ── Grid ───────────────────────────────────────────────────────────────────
 
   void _drawGrid(Canvas canvas, Size size) {
-    final linePaint = Paint()
+    const majorDiv = 10;
+    const cols = 'ABCDEFGHIJ';
+    const labelStyle = TextStyle(fontSize: 9.0, letterSpacing: 0.5);
+
+    final cellPx = mapSize.width * scale / majorDiv;
+
+    // Sub-grid: add 5 subdivisions per major cell when cells are large enough
+    if (cellPx > 100) {
+      const subDiv = majorDiv * 5; // 50 total
+      final subPaint = Paint()
+        ..color = palette.border.withValues(alpha: 0.09)
+        ..strokeWidth = 0.4;
+      for (int i = 0; i <= subDiv; i++) {
+        if (i % 5 == 0) continue; // skip positions covered by major lines
+        final t = i / subDiv;
+        final sx = t * mapSize.width * scale + translation.dx;
+        final sy = t * mapSize.height * scale + translation.dy;
+        if (sx >= 0 && sx <= size.width) {
+          _dashedLine(canvas, Offset(sx, 0), Offset(sx, size.height), subPaint, dashLen: 2, gapLen: 4);
+        }
+        if (sy >= 0 && sy <= size.height) {
+          _dashedLine(canvas, Offset(0, sy), Offset(size.width, sy), subPaint, dashLen: 2, gapLen: 4);
+        }
+      }
+    }
+
+    // Major grid
+    final majorPaint = Paint()
       ..color = palette.border.withValues(alpha: 0.18)
       ..strokeWidth = 0.6;
 
-    const labelTextStyle = TextStyle(fontSize: 9.0, letterSpacing: 0.5);
-    const divisions = 10;
-    const cols = 'ABCDEFGHIJ';
-
-    for (int i = 0; i <= divisions; i++) {
-      final t = i / divisions;
+    for (int i = 0; i <= majorDiv; i++) {
+      final t = i / majorDiv;
       final sx = t * mapSize.width * scale + translation.dx;
       final sy = t * mapSize.height * scale + translation.dy;
 
-      // Vertical line (full height)
       if (sx >= 0 && sx <= size.width) {
-        canvas.drawLine(Offset(sx, 0), Offset(sx, size.height), linePaint);
+        _dashedLine(canvas, Offset(sx, 0), Offset(sx, size.height), majorPaint, dashLen: 4, gapLen: 5);
       }
-      // Horizontal line (full width)
       if (sy >= 0 && sy <= size.height) {
-        canvas.drawLine(Offset(0, sy), Offset(size.width, sy), linePaint);
+        _dashedLine(canvas, Offset(0, sy), Offset(size.width, sy), majorPaint, dashLen: 4, gapLen: 5);
       }
 
-      // Column label (A-J) centred in each cell
-      if (i < divisions) {
+      if (i < majorDiv) {
+        // Column label (A-J) centred in each cell
         final midX =
-            ((i + 0.5) / divisions) * mapSize.width * scale + translation.dx;
+            ((i + 0.5) / majorDiv) * mapSize.width * scale + translation.dx;
         if (midX > 12 && midX < size.width - 4) {
           _paintLabel(
             canvas,
             cols[i],
             Offset(midX, 5),
             palette.border.withValues(alpha: 0.55),
-            labelTextStyle,
+            labelStyle,
           );
         }
-      }
-      // Row label (1-10)
-      if (i < divisions) {
+        // Row label (1-10)
         final midY =
-            ((i + 0.5) / divisions) * mapSize.height * scale + translation.dy;
+            ((i + 0.5) / majorDiv) * mapSize.height * scale + translation.dy;
         if (midY > 8 && midY < size.height - 4) {
           _paintLabel(
             canvas,
             '${i + 1}',
             Offset(6, midY),
             palette.border.withValues(alpha: 0.55),
-            labelTextStyle,
+            labelStyle,
           );
         }
       }
@@ -758,7 +899,6 @@ class _MapPainter extends CustomPainter {
         _dashedLine(canvas, p1, p2, paint, dashLen: 10, flowPhase: animValue);
     }
 
-    // Arrow head at end point
     _drawArrow(canvas, p1, p2, paint..strokeWidth = baseW);
   }
 
@@ -766,8 +906,8 @@ class _MapPainter extends CustomPainter {
     final vec = to - from;
     if (vec.distance < 12) return;
     final dir = vec / vec.distance;
-    const al = 7.0; // arrow leg length
-    const aa = 0.45; // angle in radians
+    const al = 7.0;
+    const aa = 0.45;
     final lp =
         to -
         Offset(
@@ -801,12 +941,8 @@ class _MapPainter extends CustomPainter {
     if (total < 0.5) return;
     final ux = dx / total;
     final uy = dy / total;
-
     final period = dashLen + gapLen;
-    // Shifting start by (flowPhase-1)*period makes dashes flow toward p2
-    // as flowPhase increases 0→1.
     double t = (flowPhase - 1.0) * period;
-
     while (t < total) {
       final s = t.clamp(0.0, total);
       final e = (t + dashLen).clamp(0.0, total);
@@ -821,13 +957,48 @@ class _MapPainter extends CustomPainter {
     }
   }
 
+  // ── Line drawing preview ───────────────────────────────────────────────────
+
+  void _drawLinePreview(Canvas canvas, Offset worldStart, Offset worldEnd) {
+    final p1 = _w2s(worldStart);
+    final p2 = _w2s(worldEnd);
+    final color = palette.primary;
+
+    // Animated dashed preview line
+    final linePaint = Paint()
+      ..color = color.withValues(alpha: 0.70)
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.square;
+    _dashedLine(
+      canvas,
+      p1,
+      p2,
+      linePaint,
+      dashLen: 8,
+      gapLen: 5,
+      flowPhase: animValue,
+    );
+
+    // Pulsing ring at start point (signals confirmed first tap)
+    final pulseR = 3.0 + 2.0 * math.sin(animValue * 2 * math.pi);
+    canvas.drawCircle(
+      p1,
+      pulseR,
+      Paint()
+        ..color = color.withValues(alpha: 0.75)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
+    // Solid inner dot
+    canvas.drawCircle(p1, 3.0, Paint()..color = color);
+  }
+
   // ── Markers ────────────────────────────────────────────────────────────────
 
-  static const double _iconR = 9.0; // screen-space icon half-size
+  static const double _iconR = 9.0;
 
   void _drawMarker(Canvas canvas, PipboyMapMarker m, Size size) {
     final pos = _w2s(m.position);
-    // Cull off-screen (with generous margin for labels)
     if (pos.dx < -40 || pos.dx > size.width + 40) return;
     if (pos.dy < -40 || pos.dy > size.height + 40) return;
 
@@ -854,7 +1025,6 @@ class _MapPainter extends CustomPainter {
         _drawRipple(canvas, pos, color);
     }
 
-    // Optional label
     if (showMarkerLabels && m.label != null) {
       _paintLabel(
         canvas,
@@ -868,13 +1038,7 @@ class _MapPainter extends CustomPainter {
 
   void _drawPin(Canvas canvas, Offset pos, Color c) {
     final fill = Paint()..color = c;
-    // Circle head
-    canvas.drawCircle(
-      Offset(pos.dx, pos.dy - _iconR * 0.85),
-      _iconR * 0.45,
-      fill,
-    );
-    // Downward-pointing teardrop body
+    canvas.drawCircle(Offset(pos.dx, pos.dy - _iconR * 0.85), _iconR * 0.45, fill);
     final path = Path()
       ..moveTo(pos.dx, pos.dy + _iconR)
       ..lineTo(pos.dx - _iconR * 0.6, pos.dy - _iconR * 0.35)
@@ -884,17 +1048,15 @@ class _MapPainter extends CustomPainter {
   }
 
   void _drawFlag(Canvas canvas, Offset pos, Color c) {
-    final paint = Paint()
+    final stroke = Paint()
       ..color = c
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
-    // Pole
     canvas.drawLine(
       Offset(pos.dx - _iconR * 0.3, pos.dy + _iconR),
       Offset(pos.dx - _iconR * 0.3, pos.dy - _iconR),
-      paint,
+      stroke,
     );
-    // Flag body
     final path = Path()
       ..moveTo(pos.dx - _iconR * 0.3, pos.dy - _iconR)
       ..lineTo(pos.dx + _iconR * 0.9, pos.dy - _iconR * 0.35)
@@ -908,10 +1070,7 @@ class _MapPainter extends CustomPainter {
     for (int i = 0; i < 10; i++) {
       final r = i.isEven ? _iconR : _iconR * 0.42;
       final angle = (i * math.pi / 5) - math.pi / 2;
-      final p = Offset(
-        pos.dx + r * math.cos(angle),
-        pos.dy + r * math.sin(angle),
-      );
+      final p = Offset(pos.dx + r * math.cos(angle), pos.dy + r * math.sin(angle));
       i == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
     }
     path.close();
@@ -922,37 +1081,19 @@ class _MapPainter extends CustomPainter {
     final fill = Paint()..color = c;
     final cut = Paint()..color = palette.background;
     const r = _iconR;
-
-    // Cranium
     canvas.drawOval(
-      Rect.fromCenter(
-        center: pos - const Offset(0, r * 0.15),
-        width: r * 1.8,
-        height: r * 1.55,
-      ),
+      Rect.fromCenter(center: pos - const Offset(0, r * 0.15), width: r * 1.8, height: r * 1.55),
       fill,
     );
-    // Jaw
     canvas.drawRect(
-      Rect.fromCenter(
-        center: pos + const Offset(0, r * 0.65),
-        width: r * 1.4,
-        height: r * 0.55,
-      ),
+      Rect.fromCenter(center: pos + const Offset(0, r * 0.65), width: r * 1.4, height: r * 0.55),
       fill,
     );
-    // Eye sockets
     canvas.drawCircle(pos - const Offset(r * 0.38, r * 0.18), r * 0.27, cut);
     canvas.drawCircle(pos + const Offset(r * 0.38, -r * 0.18), r * 0.27, cut);
-    // Teeth
     for (int t = 0; t < 3; t++) {
       canvas.drawRect(
-        Rect.fromLTWH(
-          pos.dx - r * 0.55 + t * r * 0.55,
-          pos.dy + r * 0.45,
-          r * 0.35,
-          r * 0.4,
-        ),
+        Rect.fromLTWH(pos.dx - r * 0.55 + t * r * 0.55, pos.dy + r * 0.45, r * 0.35, r * 0.4),
         cut,
       );
     }
@@ -967,7 +1108,6 @@ class _MapPainter extends CustomPainter {
       ..lineTo(pos.dx - r * 0.65, pos.dy)
       ..close();
     canvas.drawPath(path, Paint()..color = c);
-    // Inner outline
     final inner = Path()
       ..moveTo(pos.dx, pos.dy - r * 0.5)
       ..lineTo(pos.dx + r * 0.3, pos.dy)
@@ -988,16 +1128,8 @@ class _MapPainter extends CustomPainter {
       ..color = c
       ..strokeWidth = 2.5
       ..strokeCap = StrokeCap.square;
-    canvas.drawLine(
-      pos - const Offset(_iconR, 0),
-      pos + const Offset(_iconR, 0),
-      paint,
-    );
-    canvas.drawLine(
-      pos - const Offset(0, _iconR),
-      pos + const Offset(0, _iconR),
-      paint,
-    );
+    canvas.drawLine(pos - const Offset(_iconR, 0), pos + const Offset(_iconR, 0), paint);
+    canvas.drawLine(pos - const Offset(0, _iconR), pos + const Offset(0, _iconR), paint);
     canvas.drawRect(
       Rect.fromCenter(center: pos, width: 3.5, height: 3.5),
       Paint()..color = palette.background,
@@ -1006,35 +1138,24 @@ class _MapPainter extends CustomPainter {
 
   void _drawQuest(Canvas canvas, Offset pos, Color c) {
     const r = _iconR;
-    // Warning triangle
     final path = Path()
       ..moveTo(pos.dx, pos.dy - r)
       ..lineTo(pos.dx + r * 0.9, pos.dy + r * 0.65)
       ..lineTo(pos.dx - r * 0.9, pos.dy + r * 0.65)
       ..close();
     canvas.drawPath(path, Paint()..color = c);
-    // Exclamation mark (background color cutout)
     final cut = Paint()..color = palette.background;
     canvas.drawRect(
-      Rect.fromCenter(
-        center: pos - const Offset(0, r * 0.1),
-        width: 2.0,
-        height: r * 0.75,
-      ),
+      Rect.fromCenter(center: pos - const Offset(0, r * 0.1), width: 2.0, height: r * 0.75),
       cut,
     );
     canvas.drawRect(
-      Rect.fromCenter(
-        center: pos + const Offset(0, r * 0.52),
-        width: 2.0,
-        height: 2.0,
-      ),
+      Rect.fromCenter(center: pos + const Offset(0, r * 0.52), width: 2.0, height: 2.0),
       cut,
     );
   }
 
   void _drawRipple(Canvas canvas, Offset pos, Color c) {
-    // Animated expanding rings — driven by animValue (0→1 loop)
     for (int i = 0; i < 3; i++) {
       final phase = (animValue + i / 3.0) % 1.0;
       final radius = _iconR * 0.4 + phase * _iconR * 2.2;
@@ -1048,7 +1169,6 @@ class _MapPainter extends CustomPainter {
           ..strokeWidth = 1.5,
       );
     }
-    // Solid centre dot
     canvas.drawCircle(pos, _iconR * 0.35, Paint()..color = c);
   }
 
@@ -1060,29 +1180,14 @@ class _MapPainter extends CustomPainter {
     final paint = Paint()
       ..color = palette.primary.withValues(alpha: 0.40)
       ..strokeWidth = 1.0;
-    _dashedLine(
-      canvas,
-      Offset(0, pos.dy),
-      Offset(size.width, pos.dy),
-      paint,
-      dashLen: 6,
-      gapLen: 4,
-    );
-    _dashedLine(
-      canvas,
-      Offset(pos.dx, 0),
-      Offset(pos.dx, size.height),
-      paint,
-      dashLen: 6,
-      gapLen: 4,
-    );
+    _dashedLine(canvas, Offset(0, pos.dy), Offset(size.width, pos.dy), paint, dashLen: 6, gapLen: 4);
+    _dashedLine(canvas, Offset(pos.dx, 0), Offset(pos.dx, size.height), paint, dashLen: 6, gapLen: 4);
   }
 
   // ── Scale bar ──────────────────────────────────────────────────────────────
 
   void _drawScaleBar(Canvas canvas, Size size) {
-    // Choose a world-unit length that renders as a "nice" pixel width.
-    final worldWidthOnScreen = 1.0 / scale; // world units visible
+    final worldWidthOnScreen = 1.0 / scale;
     final target = worldWidthOnScreen * 0.18;
     const nice = [0.01, 0.02, 0.05, 0.1, 0.2, 0.25, 0.5, 1.0];
     final unit = nice.firstWhere((u) => u >= target, orElse: () => 1.0);
@@ -1110,6 +1215,18 @@ class _MapPainter extends CustomPainter {
     );
   }
 
+  // ── Zoom indicator ─────────────────────────────────────────────────────────
+
+  void _drawZoomIndicator(Canvas canvas, Size size) {
+    _paintLabel(
+      canvas,
+      '${scale.toStringAsFixed(1)}×',
+      Offset(size.width - 28, size.height - 18),
+      palette.textDim.withValues(alpha: 0.65),
+      const TextStyle(fontSize: 9.0),
+    );
+  }
+
   // ── Corner brackets ────────────────────────────────────────────────────────
 
   void _drawCornerBrackets(Canvas canvas, Size size) {
@@ -1118,29 +1235,17 @@ class _MapPainter extends CustomPainter {
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
-    const m = 5.0; // margin
-    const len = 14.0; // bracket arm length
+    const m = 5.0;
+    const len = 14.0;
 
     void corner(Offset a, Offset b, Offset c) {
       canvas.drawLine(a, b, paint);
       canvas.drawLine(b, c, paint);
     }
 
-    corner(
-      const Offset(m, m + len),
-      const Offset(m, m),
-      const Offset(m + len, m),
-    );
-    corner(
-      Offset(size.width - m - len, m),
-      Offset(size.width - m, m),
-      Offset(size.width - m, m + len),
-    );
-    corner(
-      Offset(m, size.height - m - len),
-      Offset(m, size.height - m),
-      Offset(m + len, size.height - m),
-    );
+    corner(const Offset(m, m + len), const Offset(m, m), const Offset(m + len, m));
+    corner(Offset(size.width - m - len, m), Offset(size.width - m, m), Offset(size.width - m, m + len));
+    corner(Offset(m, size.height - m - len), Offset(m, size.height - m), Offset(m + len, size.height - m));
     corner(
       Offset(size.width - m - len, size.height - m),
       Offset(size.width - m, size.height - m),
@@ -1150,20 +1255,11 @@ class _MapPainter extends CustomPainter {
 
   // ── Text helper ────────────────────────────────────────────────────────────
 
-  void _paintLabel(
-    Canvas canvas,
-    String text,
-    Offset centre,
-    Color color,
-    TextStyle base,
-  ) {
+  void _paintLabel(Canvas canvas, String text, Offset centre, Color color, TextStyle base) {
     final tp = TextPainter(
       text: TextSpan(
         text: text,
-        style: base.copyWith(
-          color: color,
-          fontFamily: PipboyColorPalette.fontFamily,
-        ),
+        style: base.copyWith(color: color, fontFamily: PipboyColorPalette.fontFamily),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -1185,5 +1281,7 @@ class _MapPainter extends CustomPainter {
       old.cursorWorld != cursorWorld ||
       old.blinkVisible != blinkVisible ||
       old.animValue != animValue ||
+      old.linePreviewStart != linePreviewStart ||
+      old.linePreviewEnd != linePreviewEnd ||
       old.palette.primary != palette.primary;
 }

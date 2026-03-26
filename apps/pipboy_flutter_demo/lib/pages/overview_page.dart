@@ -50,12 +50,7 @@ class _OverviewPageState extends State<OverviewPage> {
                         const SizedBox(height: 8),
                         _StatBar(label: 'AP', value: _ap, palette: palette),
                         const SizedBox(height: 8),
-                        _StatBar(
-                          label: 'RAD',
-                          value: _rad,
-                          palette: palette,
-                          color: palette.warning,
-                        ),
+                        _StatBar(label: 'RAD', value: _rad, palette: palette),
                         const SizedBox(height: 12),
                         Row(
                           children: [

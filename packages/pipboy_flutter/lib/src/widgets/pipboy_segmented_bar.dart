@@ -54,8 +54,8 @@ class PipboySegmentedBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = PipboyThemeData.paletteOf(context);
-    final filledColor = color ?? palette.primary;
-    final unfilledColor = emptyColor ?? palette.border;
+    final filledColor = color ?? palette.success;
+    final unfilledColor = emptyColor ?? palette.surfaceHigh;
 
     final filledCount = (segmentCount * value).round().clamp(0, segmentCount);
 
