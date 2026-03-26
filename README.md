@@ -4,6 +4,7 @@
 
 **A Flutter theme library and widget kit inspired by the Pip-Boy HUD from the Fallout series**
 
+[![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-blueviolet?logo=anthropic)](https://claude.ai/claude-code)
 [![CI](https://github.com/NeverMorewd/Pipboy.Flutter/actions/workflows/ci.yml/badge.svg)](https://github.com/NeverMorewd/Pipboy.Flutter/actions/workflows/ci.yml)
 [![Deploy Web Demo](https://github.com/NeverMorewd/Pipboy.Flutter/actions/workflows/deploy-web.yml/badge.svg)](https://github.com/NeverMorewd/Pipboy.Flutter/actions/workflows/deploy-web.yml)
 [![pub.dev](https://img.shields.io/pub/v/pipboy_flutter?logo=dart&logoColor=white&color=00b4ab)](https://pub.dev/packages/pipboy_flutter)
