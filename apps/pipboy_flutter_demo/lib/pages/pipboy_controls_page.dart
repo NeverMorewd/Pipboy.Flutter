@@ -139,6 +139,7 @@ class _PipboyControlsPageState extends State<PipboyControlsPage> {
                     value: 0.55,
                     label: 'AP',
                     segmentCount: 20,
+                    color: palette.textDim,
                   ),
                   const SizedBox(height: 8),
                   PipboySegmentedBar(

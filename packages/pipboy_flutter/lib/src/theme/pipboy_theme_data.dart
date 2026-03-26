@@ -16,9 +16,13 @@ class PipboyThemeData extends ThemeExtension<PipboyThemeData> {
   @override
   PipboyThemeData lerp(PipboyThemeData? other, double t) {
     if (other == null) return this;
-    // For simplicity we snap at t=1; true color interpolation would require
-    // per-field Color.lerp calls across all 18 palette entries.
-    return t < 0.5 ? this : other;
+    // Lerp every named color in the palette individually so that
+    // Material-level theme transitions animate smoothly.
+    final a = palette;
+    final b = other.palette;
+    return PipboyThemeData(
+      palette: PipboyColorPalette.lerped(a, b, t),
+    );
   }
 
   /// Retrieves [PipboyThemeData] from the nearest [BuildContext].

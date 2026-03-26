@@ -73,6 +73,33 @@ class PipboyColorPalette {
     return PipboyColorPalette._compute(hsl);
   }
 
+  /// Linearly interpolates between two palettes.
+  factory PipboyColorPalette.lerped(
+      PipboyColorPalette a, PipboyColorPalette b, double t) {
+    Color c(Color ca, Color cb) => Color.lerp(ca, cb, t)!;
+    return PipboyColorPalette._(
+      sourceHsl: t < 0.5 ? a.sourceHsl : b.sourceHsl,
+      primary: c(a.primary, b.primary),
+      primaryLight: c(a.primaryLight, b.primaryLight),
+      primaryDark: c(a.primaryDark, b.primaryDark),
+      background: c(a.background, b.background),
+      surface: c(a.surface, b.surface),
+      surfaceHigh: c(a.surfaceHigh, b.surfaceHigh),
+      text: c(a.text, b.text),
+      textDim: c(a.textDim, b.textDim),
+      hover: c(a.hover, b.hover),
+      pressed: c(a.pressed, b.pressed),
+      disabled: c(a.disabled, b.disabled),
+      focus: c(a.focus, b.focus),
+      selection: c(a.selection, b.selection),
+      border: c(a.border, b.border),
+      borderFocus: c(a.borderFocus, b.borderFocus),
+      error: c(a.error, b.error),
+      warning: c(a.warning, b.warning),
+      success: c(a.success, b.success),
+    );
+  }
+
   PipboyColorPalette._({
     required this.primary,
     required this.primaryLight,

@@ -14,6 +14,8 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
   bool _scanBeam = true;
   bool _vignette = true;
   bool _flicker = false;
+  bool _scanlineAnimation = false;
+  bool _noise = false;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +56,19 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
                     title: const Text('FLICKER'),
                     contentPadding: EdgeInsets.zero,
                   ),
+                  PipboySwitchTile(
+                    value: _scanlineAnimation,
+                    onChanged: (v) =>
+                        setState(() => _scanlineAnimation = v),
+                    title: const Text('SCANLINE ANIMATION'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  PipboySwitchTile(
+                    value: _noise,
+                    onChanged: (v) => setState(() => _noise = v),
+                    title: const Text('STATIC NOISE'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ],
               ),
             ),
@@ -66,6 +81,8 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
                   scanBeam: _scanBeam,
                   vignette: _vignette,
                   flicker: _flicker,
+                  scanlineAnimation: _scanlineAnimation,
+                  noise: _noise,
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(

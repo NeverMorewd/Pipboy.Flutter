@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:pipboy_flutter/src/theme/pipboy_theme_data.dart';
@@ -6,10 +7,11 @@ import 'package:pipboy_flutter/src/widgets/pipboy_scanline_overlay.dart';
 /// A full CRT-effect display container.
 ///
 /// Layers multiple optional effects on top of [child]:
-/// - Horizontal scanlines
+/// - Horizontal scanlines (optionally animated with upward scroll)
 /// - Animated scan beam (vertical sweep)
 /// - Vignette (darkened edges)
 /// - Screen flicker (random brightness variation)
+/// - Static noise (random bright pixel speckles)
 ///
 /// Mirrors the Avalonia `CrtDisplay` control.
 ///
@@ -37,6 +39,12 @@ class PipboyCrtDisplay extends StatefulWidget {
     this.flickerIntensity = 0.04,
     this.scanBeamDuration = const Duration(seconds: 4),
     this.backgroundColor,
+    this.scanlineAnimation = false,
+    this.scanlineAnimSpeed = 30.0,
+    this.noise = false,
+    this.noiseDensity = 0.02,
+    this.noiseOpacity = 0.06,
+    this.noiseRefreshInterval = const Duration(milliseconds: 100),
   });
 
   final Widget child;
@@ -54,6 +62,24 @@ class PipboyCrtDisplay extends StatefulWidget {
   final Duration scanBeamDuration;
   final Color? backgroundColor;
 
+  /// Enable animated upward-scrolling scanlines (Avalonia parity).
+  final bool scanlineAnimation;
+
+  /// Speed of scanline scroll in logical pixels per second.
+  final double scanlineAnimSpeed;
+
+  /// Enable static noise speckle effect (Avalonia parity).
+  final bool noise;
+
+  /// Probability per virtual grid cell that a noise pixel is drawn (0–1).
+  final double noiseDensity;
+
+  /// Opacity of each noise pixel.
+  final double noiseOpacity;
+
+  /// How often the noise pattern is regenerated.
+  final Duration noiseRefreshInterval;
+
   @override
   State<PipboyCrtDisplay> createState() => _PipboyCrtDisplayState();
 }
@@ -65,6 +91,17 @@ class _PipboyCrtDisplayState extends State<PipboyCrtDisplay>
   late final Animation<double> _beamPosition;
   double _flickerValue = 1.0;
   final _random = math.Random();
+
+  // Scanline animation
+  AnimationController? _scanlineAnimController;
+  double _scanlinePhase = 0.0;
+
+  // Flicker delay timer (cancellable, replaces Future.delayed)
+  Timer? _flickerDelayTimer;
+
+  // Noise
+  Timer? _noiseTimer;
+  List<Offset>? _noisePixels;
 
   @override
   void initState() {
@@ -89,7 +126,7 @@ class _PipboyCrtDisplayState extends State<PipboyCrtDisplay>
             _flickerValue =
                 1.0 - (_random.nextDouble() * widget.flickerIntensity);
             if (widget.flicker) {
-              Future.delayed(
+              _flickerDelayTimer = Timer(
                 Duration(milliseconds: 200 + _random.nextInt(800)),
                 () {
                   if (mounted) _flickerController.forward(from: 0);
@@ -100,8 +137,29 @@ class _PipboyCrtDisplayState extends State<PipboyCrtDisplay>
         });
 
     if (widget.flicker) {
-      Future.delayed(const Duration(milliseconds: 500), () {
+      _flickerDelayTimer = Timer(const Duration(milliseconds: 500), () {
         if (mounted) _flickerController.forward();
+      });
+    }
+
+    if (widget.scanlineAnimation) {
+      _scanlineAnimController = AnimationController(
+        vsync: this,
+        duration: const Duration(seconds: 1),
+      )..repeat();
+      _scanlineAnimController!.addListener(() {
+        setState(() {
+          _scanlinePhase =
+              (_scanlineAnimController!.value * widget.scanlineAnimSpeed) %
+              widget.scanlineSpacing;
+        });
+      });
+    }
+
+    if (widget.noise) {
+      _refreshNoise();
+      _noiseTimer = Timer.periodic(widget.noiseRefreshInterval, (_) {
+        _refreshNoise();
       });
     }
   }
@@ -110,7 +168,24 @@ class _PipboyCrtDisplayState extends State<PipboyCrtDisplay>
   void dispose() {
     _beamController.dispose();
     _flickerController.dispose();
+    _flickerDelayTimer?.cancel();
+    _scanlineAnimController?.dispose();
+    _noiseTimer?.cancel();
     super.dispose();
+  }
+
+  void _refreshNoise() {
+    if (!mounted) return;
+    const gridSize = 200;
+    final pixels = <Offset>[];
+    for (int x = 0; x < gridSize; x++) {
+      for (int y = 0; y < gridSize; y++) {
+        if (_random.nextDouble() < widget.noiseDensity) {
+          pixels.add(Offset(x / gridSize, y / gridSize));
+        }
+      }
+    }
+    setState(() => _noisePixels = pixels);
   }
 
   @override
@@ -124,6 +199,7 @@ class _PipboyCrtDisplayState extends State<PipboyCrtDisplay>
       content = PipboyScanlineOverlay(
         spacing: widget.scanlineSpacing,
         opacity: widget.scanlineOpacity,
+        phase: _scanlinePhase,
         child: content,
       );
     }
@@ -156,6 +232,25 @@ class _PipboyCrtDisplayState extends State<PipboyCrtDisplay>
       content = PipboyVignetteOverlay(
         intensity: widget.vignetteIntensity,
         child: content,
+      );
+    }
+
+    if (widget.noise && _noisePixels != null && _noisePixels!.isNotEmpty) {
+      content = Stack(
+        children: [
+          content,
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _NoisePainter(
+                  pixels: _noisePixels!,
+                  color: palette.primary,
+                  opacity: widget.noiseOpacity,
+                ),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
@@ -210,4 +305,31 @@ class _ScanBeamPainter extends CustomPainter {
   @override
   bool shouldRepaint(_ScanBeamPainter old) =>
       old.position != position || old.color != color || old.opacity != opacity;
+}
+
+class _NoisePainter extends CustomPainter {
+  const _NoisePainter({
+    required this.pixels,
+    required this.color,
+    required this.opacity,
+  });
+
+  /// Normalised [0, 1] positions.
+  final List<Offset> pixels;
+  final Color color;
+  final double opacity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color.withValues(alpha: opacity);
+    for (final p in pixels) {
+      canvas.drawRect(
+        Rect.fromLTWH(p.dx * size.width, p.dy * size.height, 1.5, 1.5),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_NoisePainter old) => old.pixels != pixels;
 }

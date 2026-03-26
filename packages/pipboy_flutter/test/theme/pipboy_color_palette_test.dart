@@ -161,4 +161,71 @@ void main() {
       );
     });
   });
+
+  group('PipboyColorPalette.lerped', () {
+    late PipboyColorPalette a;
+    late PipboyColorPalette b;
+
+    setUp(() {
+      a = PipboyColorPalette(const Color(0xFF15FF52)); // green
+      b = PipboyColorPalette(const Color(0xFFFFB300)); // amber
+    });
+
+    test('lerped at t=0.0 returns same colors as a', () {
+      final lerped = PipboyColorPalette.lerped(a, b, 0.0);
+      expect(lerped.primary, equals(a.primary));
+      expect(lerped.background, equals(a.background));
+      expect(lerped.surface, equals(a.surface));
+      expect(lerped.text, equals(a.text));
+      expect(lerped.textDim, equals(a.textDim));
+    });
+
+    test('lerped at t=1.0 returns same colors as b', () {
+      final lerped = PipboyColorPalette.lerped(a, b, 1.0);
+      expect(lerped.primary, equals(b.primary));
+      expect(lerped.background, equals(b.background));
+      expect(lerped.surface, equals(b.surface));
+      expect(lerped.text, equals(b.text));
+      expect(lerped.textDim, equals(b.textDim));
+    });
+
+    test('lerped at t=0.5 returns intermediate colors', () {
+      final lerped = PipboyColorPalette.lerped(a, b, 0.5);
+      // Each channel should be between the two endpoints.
+      double rA = a.primary.r;
+      double rB = b.primary.r;
+      double rLerped = lerped.primary.r;
+      final rMin = rA < rB ? rA : rB;
+      final rMax = rA < rB ? rB : rA;
+      expect(rLerped, greaterThanOrEqualTo(rMin - 0.01));
+      expect(rLerped, lessThanOrEqualTo(rMax + 0.01));
+    });
+
+    test('lerped at t=0.5 sourceHsl uses a (t < 0.5 branch is for t < 0.5)',
+        () {
+      // t=0.5 should yield b.sourceHsl per the implementation (t < 0.5 is false)
+      final lerped = PipboyColorPalette.lerped(a, b, 0.5);
+      expect(lerped.sourceHsl.hue, closeTo(b.sourceHsl.hue, 1.0));
+    });
+
+    test('lerped result has non-transparent colors', () {
+      final lerped = PipboyColorPalette.lerped(a, b, 0.5);
+      final colors = [
+        lerped.primary,
+        lerped.background,
+        lerped.surface,
+        lerped.text,
+        lerped.error,
+        lerped.warning,
+        lerped.success,
+      ];
+      for (final color in colors) {
+        expect(
+          (color.a * 255.0).round(),
+          greaterThan(0),
+          reason: 'Lerped color $color must not be transparent',
+        );
+      }
+    });
+  });
 }

@@ -20,6 +20,7 @@ class PipboyScanlineOverlay extends StatelessWidget {
     this.opacity = 0.12,
     this.lineThickness = 1.0,
     this.color,
+    this.phase = 0.0,
   });
 
   final Widget child;
@@ -36,6 +37,9 @@ class PipboyScanlineOverlay extends StatelessWidget {
   /// Color of the scanlines. Defaults to black.
   final Color? color;
 
+  /// Vertical scroll offset in logical pixels. Used for animated scanlines.
+  final double phase;
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -49,6 +53,7 @@ class PipboyScanlineOverlay extends StatelessWidget {
                 opacity: opacity,
                 lineThickness: lineThickness,
                 color: color ?? Colors.black,
+                phase: phase,
               ),
             ),
           ),
@@ -64,12 +69,14 @@ class _ScanlinePainter extends CustomPainter {
     required this.opacity,
     required this.lineThickness,
     required this.color,
+    this.phase = 0.0,
   });
 
   final double spacing;
   final double opacity;
   final double lineThickness;
   final Color color;
+  final double phase;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -78,10 +85,9 @@ class _ScanlinePainter extends CustomPainter {
       ..strokeWidth = lineThickness
       ..style = PaintingStyle.stroke;
 
-    var y = 0.0;
-    while (y < size.height) {
+    final offset = phase % spacing;
+    for (double y = -spacing + offset; y < size.height + spacing; y += spacing) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-      y += spacing;
     }
   }
 
@@ -90,7 +96,8 @@ class _ScanlinePainter extends CustomPainter {
       oldDelegate.spacing != spacing ||
       oldDelegate.opacity != opacity ||
       oldDelegate.lineThickness != lineThickness ||
-      oldDelegate.color != color;
+      oldDelegate.color != color ||
+      oldDelegate.phase != phase;
 }
 
 /// Applies a vignette (darkened edges) effect over [child].
