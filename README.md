@@ -1,8 +1,25 @@
-# Pipboy.Flutter
+<div align="center">
 
-A Flutter theme library and widget kit inspired by the Pip-Boy HUD from the **Fallout** series. Built on Material 3 with a monochromatic HSL palette, CRT effects, and a full custom widget set.
+# ☢ Pipboy Flutter
+
+**A Flutter theme library and widget kit inspired by the Pip-Boy HUD from the Fallout series**
+
+[![CI](https://github.com/NeverMorewd/Pipboy.Flutter/actions/workflows/ci.yml/badge.svg)](https://github.com/NeverMorewd/Pipboy.Flutter/actions/workflows/ci.yml)
+[![Deploy Web Demo](https://github.com/NeverMorewd/Pipboy.Flutter/actions/workflows/deploy-web.yml/badge.svg)](https://github.com/NeverMorewd/Pipboy.Flutter/actions/workflows/deploy-web.yml)
+[![pub.dev](https://img.shields.io/pub/v/pipboy_flutter?logo=dart&logoColor=white&color=00b4ab)](https://pub.dev/packages/pipboy_flutter)
+[![pub points](https://img.shields.io/pub/points/pipboy_flutter?logo=dart&logoColor=white)](https://pub.dev/packages/pipboy_flutter/score)
+[![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.22-54C5F8?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-%5E3.11-0175C2?logo=dart&logoColor=white)](https://dart.dev)
+[![License](https://img.shields.io/github/license/NeverMorewd/Pipboy.Flutter?color=green)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](#)
+[![Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-brightgreen?logo=github)](https://nevermorewd.github.io/Pipboy.Flutter/)
+[![Stars](https://img.shields.io/github/stars/NeverMorewd/Pipboy.Flutter?style=social)](https://github.com/NeverMorewd/Pipboy.Flutter/stargazers)
+
+> 🎮 The Flutter counterpart of [Pipboy.Avalonia](https://github.com/NeverMorewd/Pipboy.Avalonia) — the same retro-terminal aesthetic, now for every Flutter platform.
 
 **[Live Demo →](https://nevermorewd.github.io/Pipboy.Flutter/)**
+
+</div>
 
 ---
 
