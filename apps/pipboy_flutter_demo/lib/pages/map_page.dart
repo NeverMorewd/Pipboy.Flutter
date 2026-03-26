@@ -134,8 +134,12 @@ class _MapPageState extends State<MapPage> {
       ),
     ];
 
-    for (final m in ms) _controller.addMarker(m);
-    for (final l in ls) _controller.addLine(l);
+    for (final m in ms) {
+      _controller.addMarker(m);
+    }
+    for (final l in ls) {
+      _controller.addLine(l);
+    }
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
@@ -247,8 +251,7 @@ class _MapPageState extends State<MapPage> {
                     palette: palette,
                     height: layout.btnH,
                     fontSize: layout.fontSize,
-                    onTap: () =>
-                        setState(() => _showScaleBar = !_showScaleBar),
+                    onTap: () => setState(() => _showScaleBar = !_showScaleBar),
                   ),
                   _ToggleBtn(
                     label: 'LABELS',
@@ -324,8 +327,15 @@ class _MapPageState extends State<MapPage> {
 
   void _clearUserContent() {
     const sampleMarkerIds = {
-      's_pin', 's_flag', 's_skull', 's_star', 's_quest',
-      's_diamond', 's_circle', 's_cross', 's_ripple',
+      's_pin',
+      's_flag',
+      's_skull',
+      's_star',
+      's_quest',
+      's_diamond',
+      's_circle',
+      's_cross',
+      's_ripple',
     };
     const sampleLineIds = {'l_solid', 'l_dashed', 'l_dotted', 'l_flow'};
 
@@ -333,13 +343,17 @@ class _MapPageState extends State<MapPage> {
         .where((m) => !sampleMarkerIds.contains(m.id))
         .map((m) => m.id)
         .toList();
-    for (final id in markersToRemove) _controller.removeMarker(id);
+    for (final id in markersToRemove) {
+      _controller.removeMarker(id);
+    }
 
     final linesToRemove = _controller.lines
         .where((l) => !sampleLineIds.contains(l.id))
         .map((l) => l.id)
         .toList();
-    for (final id in linesToRemove) _controller.removeLine(id);
+    for (final id in linesToRemove) {
+      _controller.removeLine(id);
+    }
   }
 
   // ── Line bar ───────────────────────────────────────────────────────────────
@@ -521,17 +535,17 @@ class _MapLayout {
   _MapLayout(double width) : _compact = width < 600;
   final bool _compact;
 
-  double get toolbarH    => _compact ? 48.0 : 44.0;
-  double get lineBarH    => _compact ? 44.0 : 36.0;
-  double get markerBarH  => _compact ? 46.0 : 38.0;
-  double get statusBarH  => _compact ? 36.0 : 30.0;
-  double get btnH        => _compact ? 36.0 : 28.0;
-  double get iconBtnSz   => _compact ? 34.0 : 28.0;
-  double get markerBtnH  => _compact ? 32.0 : 26.0;
+  double get toolbarH => _compact ? 48.0 : 44.0;
+  double get lineBarH => _compact ? 44.0 : 36.0;
+  double get markerBarH => _compact ? 46.0 : 38.0;
+  double get statusBarH => _compact ? 36.0 : 30.0;
+  double get btnH => _compact ? 36.0 : 28.0;
+  double get iconBtnSz => _compact ? 34.0 : 28.0;
+  double get markerBtnH => _compact ? 32.0 : 26.0;
   // Always use the palette's readable size — never below 10px
-  double get fontSize      => PipboyColorPalette.fontSizeSmall; // 11.0
+  double get fontSize => PipboyColorPalette.fontSizeSmall; // 11.0
   double get fontSizeSmall => 10.0;
-  double get iconSize    => _compact ? 18.0 : 15.0;
+  double get iconSize => _compact ? 18.0 : 15.0;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -641,15 +655,15 @@ class _MarkerKindBtn extends StatelessWidget {
   final double fontSize;
 
   static const _labels = {
-    PipboyMapMarkerKind.pin:     'PIN',
-    PipboyMapMarkerKind.flag:    'FLAG',
-    PipboyMapMarkerKind.star:    'STAR',
-    PipboyMapMarkerKind.skull:   'SKULL',
+    PipboyMapMarkerKind.pin: 'PIN',
+    PipboyMapMarkerKind.flag: 'FLAG',
+    PipboyMapMarkerKind.star: 'STAR',
+    PipboyMapMarkerKind.skull: 'SKULL',
     PipboyMapMarkerKind.diamond: 'DMD',
-    PipboyMapMarkerKind.circle:  'DOT',
-    PipboyMapMarkerKind.cross:   'CROSS',
-    PipboyMapMarkerKind.quest:   '(!)',
-    PipboyMapMarkerKind.ripple:  'SIG',
+    PipboyMapMarkerKind.circle: 'DOT',
+    PipboyMapMarkerKind.cross: 'CROSS',
+    PipboyMapMarkerKind.quest: '(!)',
+    PipboyMapMarkerKind.ripple: 'SIG',
   };
 
   @override

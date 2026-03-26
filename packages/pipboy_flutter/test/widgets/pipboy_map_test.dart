@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pipboy_flutter/pipboy_flutter.dart';
 
@@ -226,10 +225,7 @@ void main() {
     const original = PipboyMapMarker(
       id: 'orig',
       position: Offset(0.3, 0.7),
-      kind: PipboyMapMarkerKind.pin,
       label: 'ORIGINAL',
-      isVisible: true,
-      isBlinking: false,
     );
 
     test('copyWith with no arguments returns equivalent marker', () {

@@ -330,9 +330,9 @@ class _PipboyMapState extends State<PipboyMap>
   Offset? _tapDownPos;
 
   // ── Line drawing state ─────────────────────────────────────────────────────
-  Offset? _lineDrawStart;        // world coords — confirmed start point
-  Offset? _lineDrawStartScreen;  // screen coords — drag distance detection
-  Offset? _lineDrawCurrent;      // world coords — live preview end (cursor)
+  Offset? _lineDrawStart; // world coords — confirmed start point
+  Offset? _lineDrawStartScreen; // screen coords — drag distance detection
+  Offset? _lineDrawCurrent; // world coords — live preview end (cursor)
   bool _lineHasPendingStart = false; // tap-tap: first tap done, awaiting second
   int _lineCounter = 0;
 
@@ -445,9 +445,7 @@ class _PipboyMapState extends State<PipboyMap>
     if (e.buttons & 0x01 == 0) return;
     if (widget.isLineDrawingEnabled) {
       // Capture start for line drawing; ignore extra fingers
-      if (_lineDrawStartScreen == null) {
-        _lineDrawStartScreen = e.localPosition;
-      }
+      _lineDrawStartScreen ??= e.localPosition;
     } else {
       _tapDownPos = e.localPosition;
     }
@@ -488,11 +486,7 @@ class _PipboyMapState extends State<PipboyMap>
     }
   }
 
-  void _handleLinePointerUp(
-    Offset screenPos,
-    Offset startScreen,
-    bool isDrag,
-  ) {
+  void _handleLinePointerUp(Offset screenPos, Offset startScreen, bool isDrag) {
     if (isDrag) {
       // Drag-to-draw: commit the line immediately on release
       _commitLine(_screenToWorld(startScreen), _screenToWorld(screenPos));
@@ -526,13 +520,15 @@ class _PipboyMapState extends State<PipboyMap>
 
   void _commitLine(Offset worldStart, Offset worldEnd) {
     if ((worldEnd - worldStart).distance < 0.005) return; // degenerate guard
-    widget.onLineAdded?.call(PipboyMapLine(
-      id: 'line_${++_lineCounter}',
-      start: worldStart,
-      end: worldEnd,
-      style: widget.defaultLineStyle,
-      isThick: widget.defaultLineIsThick,
-    ));
+    widget.onLineAdded?.call(
+      PipboyMapLine(
+        id: 'line_${++_lineCounter}',
+        start: worldStart,
+        end: worldEnd,
+        style: widget.defaultLineStyle,
+        isThick: widget.defaultLineIsThick,
+      ),
+    );
   }
 
   /// Returns the topmost visible marker within [hitRadius] screen pixels of
@@ -608,10 +604,12 @@ class _PipboyMapState extends State<PipboyMap>
 
     // Line preview: only show when start is confirmed (pending second tap or
     // pointer is held down for drag)
-    final linePreviewStart =
-        widget.isLineDrawingEnabled ? _lineDrawStart : null;
-    final linePreviewEnd =
-        widget.isLineDrawingEnabled ? _lineDrawCurrent : null;
+    final linePreviewStart = widget.isLineDrawingEnabled
+        ? _lineDrawStart
+        : null;
+    final linePreviewEnd = widget.isLineDrawingEnabled
+        ? _lineDrawCurrent
+        : null;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -622,8 +620,8 @@ class _PipboyMapState extends State<PipboyMap>
             cursor: widget.isLineDrawingEnabled
                 ? SystemMouseCursors.precise
                 : widget.isMarkerPlacementEnabled
-                    ? SystemMouseCursors.cell
-                    : SystemMouseCursors.precise,
+                ? SystemMouseCursors.cell
+                : SystemMouseCursors.precise,
             onExit: _onPointerExit,
             child: Listener(
               onPointerDown: _onPointerDown,
@@ -812,10 +810,24 @@ class _MapPainter extends CustomPainter {
         final sx = t * mapSize.width * scale + translation.dx;
         final sy = t * mapSize.height * scale + translation.dy;
         if (sx >= 0 && sx <= size.width) {
-          _dashedLine(canvas, Offset(sx, 0), Offset(sx, size.height), subPaint, dashLen: 2, gapLen: 4);
+          _dashedLine(
+            canvas,
+            Offset(sx, 0),
+            Offset(sx, size.height),
+            subPaint,
+            dashLen: 2,
+            gapLen: 4,
+          );
         }
         if (sy >= 0 && sy <= size.height) {
-          _dashedLine(canvas, Offset(0, sy), Offset(size.width, sy), subPaint, dashLen: 2, gapLen: 4);
+          _dashedLine(
+            canvas,
+            Offset(0, sy),
+            Offset(size.width, sy),
+            subPaint,
+            dashLen: 2,
+            gapLen: 4,
+          );
         }
       }
     }
@@ -831,10 +843,22 @@ class _MapPainter extends CustomPainter {
       final sy = t * mapSize.height * scale + translation.dy;
 
       if (sx >= 0 && sx <= size.width) {
-        _dashedLine(canvas, Offset(sx, 0), Offset(sx, size.height), majorPaint, dashLen: 4, gapLen: 5);
+        _dashedLine(
+          canvas,
+          Offset(sx, 0),
+          Offset(sx, size.height),
+          majorPaint,
+          dashLen: 4,
+        );
       }
       if (sy >= 0 && sy <= size.height) {
-        _dashedLine(canvas, Offset(0, sy), Offset(size.width, sy), majorPaint, dashLen: 4, gapLen: 5);
+        _dashedLine(
+          canvas,
+          Offset(0, sy),
+          Offset(size.width, sy),
+          majorPaint,
+          dashLen: 4,
+        );
       }
 
       if (i < majorDiv) {
@@ -969,15 +993,7 @@ class _MapPainter extends CustomPainter {
       ..color = color.withValues(alpha: 0.70)
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.square;
-    _dashedLine(
-      canvas,
-      p1,
-      p2,
-      linePaint,
-      dashLen: 8,
-      gapLen: 5,
-      flowPhase: animValue,
-    );
+    _dashedLine(canvas, p1, p2, linePaint, flowPhase: animValue);
 
     // Pulsing ring at start point (signals confirmed first tap)
     final pulseR = 3.0 + 2.0 * math.sin(animValue * 2 * math.pi);
@@ -1038,7 +1054,11 @@ class _MapPainter extends CustomPainter {
 
   void _drawPin(Canvas canvas, Offset pos, Color c) {
     final fill = Paint()..color = c;
-    canvas.drawCircle(Offset(pos.dx, pos.dy - _iconR * 0.85), _iconR * 0.45, fill);
+    canvas.drawCircle(
+      Offset(pos.dx, pos.dy - _iconR * 0.85),
+      _iconR * 0.45,
+      fill,
+    );
     final path = Path()
       ..moveTo(pos.dx, pos.dy + _iconR)
       ..lineTo(pos.dx - _iconR * 0.6, pos.dy - _iconR * 0.35)
@@ -1070,7 +1090,10 @@ class _MapPainter extends CustomPainter {
     for (int i = 0; i < 10; i++) {
       final r = i.isEven ? _iconR : _iconR * 0.42;
       final angle = (i * math.pi / 5) - math.pi / 2;
-      final p = Offset(pos.dx + r * math.cos(angle), pos.dy + r * math.sin(angle));
+      final p = Offset(
+        pos.dx + r * math.cos(angle),
+        pos.dy + r * math.sin(angle),
+      );
       i == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
     }
     path.close();
@@ -1082,18 +1105,31 @@ class _MapPainter extends CustomPainter {
     final cut = Paint()..color = palette.background;
     const r = _iconR;
     canvas.drawOval(
-      Rect.fromCenter(center: pos - const Offset(0, r * 0.15), width: r * 1.8, height: r * 1.55),
+      Rect.fromCenter(
+        center: pos - const Offset(0, r * 0.15),
+        width: r * 1.8,
+        height: r * 1.55,
+      ),
       fill,
     );
     canvas.drawRect(
-      Rect.fromCenter(center: pos + const Offset(0, r * 0.65), width: r * 1.4, height: r * 0.55),
+      Rect.fromCenter(
+        center: pos + const Offset(0, r * 0.65),
+        width: r * 1.4,
+        height: r * 0.55,
+      ),
       fill,
     );
     canvas.drawCircle(pos - const Offset(r * 0.38, r * 0.18), r * 0.27, cut);
     canvas.drawCircle(pos + const Offset(r * 0.38, -r * 0.18), r * 0.27, cut);
     for (int t = 0; t < 3; t++) {
       canvas.drawRect(
-        Rect.fromLTWH(pos.dx - r * 0.55 + t * r * 0.55, pos.dy + r * 0.45, r * 0.35, r * 0.4),
+        Rect.fromLTWH(
+          pos.dx - r * 0.55 + t * r * 0.55,
+          pos.dy + r * 0.45,
+          r * 0.35,
+          r * 0.4,
+        ),
         cut,
       );
     }
@@ -1128,8 +1164,16 @@ class _MapPainter extends CustomPainter {
       ..color = c
       ..strokeWidth = 2.5
       ..strokeCap = StrokeCap.square;
-    canvas.drawLine(pos - const Offset(_iconR, 0), pos + const Offset(_iconR, 0), paint);
-    canvas.drawLine(pos - const Offset(0, _iconR), pos + const Offset(0, _iconR), paint);
+    canvas.drawLine(
+      pos - const Offset(_iconR, 0),
+      pos + const Offset(_iconR, 0),
+      paint,
+    );
+    canvas.drawLine(
+      pos - const Offset(0, _iconR),
+      pos + const Offset(0, _iconR),
+      paint,
+    );
     canvas.drawRect(
       Rect.fromCenter(center: pos, width: 3.5, height: 3.5),
       Paint()..color = palette.background,
@@ -1146,11 +1190,19 @@ class _MapPainter extends CustomPainter {
     canvas.drawPath(path, Paint()..color = c);
     final cut = Paint()..color = palette.background;
     canvas.drawRect(
-      Rect.fromCenter(center: pos - const Offset(0, r * 0.1), width: 2.0, height: r * 0.75),
+      Rect.fromCenter(
+        center: pos - const Offset(0, r * 0.1),
+        width: 2.0,
+        height: r * 0.75,
+      ),
       cut,
     );
     canvas.drawRect(
-      Rect.fromCenter(center: pos + const Offset(0, r * 0.52), width: 2.0, height: 2.0),
+      Rect.fromCenter(
+        center: pos + const Offset(0, r * 0.52),
+        width: 2.0,
+        height: 2.0,
+      ),
       cut,
     );
   }
@@ -1180,8 +1232,22 @@ class _MapPainter extends CustomPainter {
     final paint = Paint()
       ..color = palette.primary.withValues(alpha: 0.40)
       ..strokeWidth = 1.0;
-    _dashedLine(canvas, Offset(0, pos.dy), Offset(size.width, pos.dy), paint, dashLen: 6, gapLen: 4);
-    _dashedLine(canvas, Offset(pos.dx, 0), Offset(pos.dx, size.height), paint, dashLen: 6, gapLen: 4);
+    _dashedLine(
+      canvas,
+      Offset(0, pos.dy),
+      Offset(size.width, pos.dy),
+      paint,
+      dashLen: 6,
+      gapLen: 4,
+    );
+    _dashedLine(
+      canvas,
+      Offset(pos.dx, 0),
+      Offset(pos.dx, size.height),
+      paint,
+      dashLen: 6,
+      gapLen: 4,
+    );
   }
 
   // ── Scale bar ──────────────────────────────────────────────────────────────
@@ -1243,9 +1309,21 @@ class _MapPainter extends CustomPainter {
       canvas.drawLine(b, c, paint);
     }
 
-    corner(const Offset(m, m + len), const Offset(m, m), const Offset(m + len, m));
-    corner(Offset(size.width - m - len, m), Offset(size.width - m, m), Offset(size.width - m, m + len));
-    corner(Offset(m, size.height - m - len), Offset(m, size.height - m), Offset(m + len, size.height - m));
+    corner(
+      const Offset(m, m + len),
+      const Offset(m, m),
+      const Offset(m + len, m),
+    );
+    corner(
+      Offset(size.width - m - len, m),
+      Offset(size.width - m, m),
+      Offset(size.width - m, m + len),
+    );
+    corner(
+      Offset(m, size.height - m - len),
+      Offset(m, size.height - m),
+      Offset(m + len, size.height - m),
+    );
     corner(
       Offset(size.width - m - len, size.height - m),
       Offset(size.width - m, size.height - m),
@@ -1255,11 +1333,20 @@ class _MapPainter extends CustomPainter {
 
   // ── Text helper ────────────────────────────────────────────────────────────
 
-  void _paintLabel(Canvas canvas, String text, Offset centre, Color color, TextStyle base) {
+  void _paintLabel(
+    Canvas canvas,
+    String text,
+    Offset centre,
+    Color color,
+    TextStyle base,
+  ) {
     final tp = TextPainter(
       text: TextSpan(
         text: text,
-        style: base.copyWith(color: color, fontFamily: PipboyColorPalette.fontFamily),
+        style: base.copyWith(
+          color: color,
+          fontFamily: PipboyColorPalette.fontFamily,
+        ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();

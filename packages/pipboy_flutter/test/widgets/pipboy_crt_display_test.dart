@@ -9,17 +9,15 @@ Widget _wrap(Widget child) => MaterialApp(
 
 void main() {
   group('PipboyCrtDisplay', () {
-    testWidgets('renders without errors with all effects disabled',
-        (tester) async {
+    testWidgets('renders without errors with all effects disabled', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _wrap(
           const PipboyCrtDisplay(
             scanlines: false,
             scanBeam: false,
             vignette: false,
-            flicker: false,
-            noise: false,
-            scanlineAnimation: false,
             child: Text('CRT CONTENT'),
           ),
         ),
@@ -31,9 +29,6 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           const PipboyCrtDisplay(
-            scanlines: true,
-            scanBeam: true,
-            vignette: true,
             flicker: true,
             noise: true,
             scanlineAnimation: true,
@@ -48,9 +43,7 @@ void main() {
 
     testWidgets('renders with default parameters', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          const PipboyCrtDisplay(child: Text('DEFAULT')),
-        ),
+        _wrap(const PipboyCrtDisplay(child: Text('DEFAULT'))),
       );
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('DEFAULT'), findsOneWidget);
@@ -220,7 +213,5 @@ class _ScanBeamPainterTestHelper {
   final double opacity;
 
   bool shouldRepaintWith(_ScanBeamPainterTestHelper old) =>
-      old.position != position ||
-      old.color != color ||
-      old.opacity != opacity;
+      old.position != position || old.color != color || old.opacity != opacity;
 }

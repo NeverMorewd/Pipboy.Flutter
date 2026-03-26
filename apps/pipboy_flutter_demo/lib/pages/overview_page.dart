@@ -192,13 +192,11 @@ class _StatBar extends StatelessWidget {
     required this.label,
     required this.value,
     required this.palette,
-    this.color,
   });
 
   final String label;
   final double value;
   final PipboyColorPalette palette;
-  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -216,13 +214,7 @@ class _StatBar extends StatelessWidget {
             ),
           ),
         ),
-        Expanded(
-          child: PipboySegmentedBar(
-            value: value,
-            color: color,
-            showLabel: false,
-          ),
-        ),
+        Expanded(child: PipboySegmentedBar(value: value, showLabel: false)),
         const SizedBox(width: 8),
         SizedBox(
           width: 36,
