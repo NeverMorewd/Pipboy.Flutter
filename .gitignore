@@ -67,4 +67,4 @@ app.*.map.json
 
 # Coverage
 coverage/
-.claude/settings.local.json
+.claude/
