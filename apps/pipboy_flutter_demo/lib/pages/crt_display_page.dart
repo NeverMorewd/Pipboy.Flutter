@@ -58,8 +58,7 @@ class _CrtDisplayPageState extends State<CrtDisplayPage> {
                   ),
                   PipboySwitchTile(
                     value: _scanlineAnimation,
-                    onChanged: (v) =>
-                        setState(() => _scanlineAnimation = v),
+                    onChanged: (v) => setState(() => _scanlineAnimation = v),
                     title: const Text('SCANLINE ANIMATION'),
                     contentPadding: EdgeInsets.zero,
                   ),

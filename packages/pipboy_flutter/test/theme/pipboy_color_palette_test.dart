@@ -201,8 +201,7 @@ void main() {
       expect(rLerped, lessThanOrEqualTo(rMax + 0.01));
     });
 
-    test('lerped at t=0.5 sourceHsl uses a (t < 0.5 branch is for t < 0.5)',
-        () {
+    test('lerped at t=0.5 sourceHsl uses a (t < 0.5 branch is for t < 0.5)', () {
       // t=0.5 should yield b.sourceHsl per the implementation (t < 0.5 is false)
       final lerped = PipboyColorPalette.lerped(a, b, 0.5);
       expect(lerped.sourceHsl.hue, closeTo(b.sourceHsl.hue, 1.0));

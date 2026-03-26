@@ -86,7 +86,11 @@ class _ScanlinePainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final offset = phase % spacing;
-    for (double y = -spacing + offset; y < size.height + spacing; y += spacing) {
+    for (
+      double y = -spacing + offset;
+      y < size.height + spacing;
+      y += spacing
+    ) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
   }

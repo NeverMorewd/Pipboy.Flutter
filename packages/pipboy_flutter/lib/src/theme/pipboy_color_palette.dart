@@ -75,7 +75,10 @@ class PipboyColorPalette {
 
   /// Linearly interpolates between two palettes.
   factory PipboyColorPalette.lerped(
-      PipboyColorPalette a, PipboyColorPalette b, double t) {
+    PipboyColorPalette a,
+    PipboyColorPalette b,
+    double t,
+  ) {
     Color c(Color ca, Color cb) => Color.lerp(ca, cb, t)!;
     return PipboyColorPalette._(
       sourceHsl: t < 0.5 ? a.sourceHsl : b.sourceHsl,

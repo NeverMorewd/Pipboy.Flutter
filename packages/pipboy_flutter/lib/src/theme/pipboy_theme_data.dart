@@ -20,9 +20,7 @@ class PipboyThemeData extends ThemeExtension<PipboyThemeData> {
     // Material-level theme transitions animate smoothly.
     final a = palette;
     final b = other.palette;
-    return PipboyThemeData(
-      palette: PipboyColorPalette.lerped(a, b, t),
-    );
+    return PipboyThemeData(palette: PipboyColorPalette.lerped(a, b, t));
   }
 
   /// Retrieves [PipboyThemeData] from the nearest [BuildContext].
